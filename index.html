@@ -50,9 +50,10 @@
             color: var(--text-primary);
             border-radius: 15px;
             box-shadow: 0 15px 35px var(--shadow);
-            margin: 20px auto;
+            margin: 20px 10px;
             padding: 30px;
-            max-width: 800px;
+            max-width: 100%;
+            width: 100%;
             transition: all 0.3s ease;
         }
         
@@ -226,6 +227,12 @@
             font-family: 'Times New Roman', serif !important;
             font-size: 11pt !important;
             line-height: 1.4 !important;
+            max-width: 100% !important;
+            width: 100% !important;
+            margin: 0 !important;
+            padding: 20px !important;
+            overflow-x: auto !important;
+            box-sizing: border-box !important;
         }
 
         .tech-badges {
@@ -319,12 +326,18 @@
             }
             
             .container {
-                margin: 10px;
-                padding: 20px;
+                margin: 5px;
+                padding: 15px;
+                width: calc(100% - 10px);
             }
             
             .progress-container {
                 padding: 10px;
+            }
+            
+            #cvPreview {
+                font-size: 10pt !important;
+                padding: 15px !important;
             }
         }
     </style>
@@ -335,18 +348,11 @@
         <i class="fas fa-moon" id="themeIcon"></i>
     </div>
 
-    <div class="container">
+    <div class="container" style="max-width: none; margin: 20px 10px;">
         <div class="header">
             <div class="d-flex justify-content-center align-items-center mb-3">
                 <div>
                     <h1><i class="fas fa-file-alt icon"></i>Generador de CV Harvard</h1>
-                    <p>Desarrollado con React, Angular y Python - Tecnologías Modernas</p>
-                    <div class="d-flex justify-content-center gap-3 mt-3">
-                        <span class="badge bg-primary fs-6"><i class="fab fa-react"></i> React</span>
-                        <span class="badge bg-danger fs-6"><i class="fab fa-angular"></i> Angular</span>
-                        <span class="badge bg-warning text-dark fs-6"><i class="fab fa-python"></i> Python</span>
-                        <span class="badge bg-info fs-6"><i class="fas fa-code"></i> TypeScript</span>
-                    </div>
                 </div>
             </div>
         </div>
@@ -390,7 +396,8 @@
             <div class="row mb-3">
                 <div class="col-md-6">
                     <label for="telefono" class="form-label">Teléfono</label>
-                    <input type="tel" class="form-control" id="telefono" placeholder="+34 123 456 789">
+                    <input type="tel" class="form-control" id="telefono" placeholder="+34 612 345 678">
+                    <div class="form-text">Número para contacto directo por WhatsApp</div>
                 </div>
                 <div class="col-md-6">
                     <label for="ubicacion" class="form-label">Ubicación</label>
@@ -407,6 +414,21 @@
                 <div class="col-md-6">
                     <label for="portfolio" class="form-label">Portfolio (Opcional)</label>
                     <input type="url" class="form-control" id="portfolio" placeholder="https://tu-portfolio.com">
+                </div>
+            </div>
+            
+            <!-- Perfil Profesional -->
+            <div class="section-header">
+                <i class="fas fa-user-circle icon"></i>Perfil Profesional
+            </div>
+            
+            <div class="mb-3">
+                <label for="perfilProfesional" class="form-label">Resumen Profesional</label>
+                <textarea class="form-control textarea-large" id="perfilProfesional" 
+                    placeholder="Ejemplo:&#10;Profesional egresado en ingeniería en sistemas de información, con un enfoque proactivo y autodidacta, con experiencia en desarrollo de software fullstack y administración de servidores. Me destaco por mi capacidad para aprender rápidamente y adaptarme a entornos dinámicos."></textarea>
+                <div class="d-flex justify-content-between">
+                    <div class="form-text">Describe tu perfil profesional en 2-3 líneas</div>
+                    <small id="perfilProfesionalCounter" class="text-muted">0 caracteres</small>
                 </div>
             </div>
             
@@ -490,16 +512,6 @@
                 </div>
             </div>
 
-            <!-- Análisis con Python -->
-            <div class="python-analysis">
-                <h6><i class="fab fa-python icon"></i>Análisis Inteligente con Python</h6>
-                <p class="mb-3 small">Nuestro algoritmo de Python analiza tu CV y genera sugerencias personalizadas</p>
-                <button type="button" class="btn btn-warning btn-sm" onclick="analizarCV()" id="analizarBtn">
-                    <i class="fas fa-chart-line icon"></i>Analizar CV con IA
-                </button>
-                <div id="analisisResultado" class="mt-3" style="display: none;"></div>
-            </div>
-            
             <!-- Botones de acción -->
             <div class="text-center mt-4">
                 <button type="button" class="btn btn-primary" onclick="generarCV()">
@@ -517,12 +529,18 @@
         <!-- Área de resultados -->
         <div id="resultado" class="preview-area" style="display: none;">
             <h4><i class="fas fa-file-code icon"></i>CV Harvard Generado</h4>
+            
+            <!-- Aviso ATS -->
+            <div class="alert alert-info mb-3" style="background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%); border: 1px solid #90caf9; border-radius: 8px; padding: 12px; color: var(--text-primary);">
+                <i class="fas fa-robot"></i> <strong>Compatible ATS:</strong> Este CV está optimizado para pasar filtros automáticos de reclutamiento con formato Harvard auténtico.
+            </div>
+            
             <div class="mb-3">
                 <button type="button" class="download-btn" onclick="generarWord()" id="wordBtn">
                     <i class="fas fa-file-word icon"></i>Descargar Word
                 </button>
                 <button type="button" class="download-btn" onclick="generarPDF()" id="pdfBtn">
-                    <i class="fas fa-file-pdf icon"></i>Generar PDF
+                    <i class="fas fa-file-pdf icon"></i>Generar PDF Harvard
                 </button>
                 <button type="button" class="download-btn" onclick="verVistaPrevia()" id="previewBtn">
                     <i class="fas fa-eye icon"></i>Vista Previa
@@ -530,22 +548,22 @@
             </div>
             <div id="previewArea" style="display: none;">
                 <h5>Vista Previa del CV:</h5>
-                <div id="cvPreview" style="background: white; padding: 20px; border: 1px solid #ddd; border-radius: 8px; font-family: 'Times New Roman', serif;"></div>
+                <div id="cvPreview" style="background: white; padding: 20px; border: 1px solid #ddd; border-radius: 8px; font-family: 'Times New Roman', serif; max-width: 100%; width: 100%; margin: 0; overflow-x: auto;"></div>
             </div>
         </div>
         
         <!-- Información adicional -->
         <div class="info-card">
-            <h5><i class="fas fa-info-circle icon"></i>¿Cómo funciona nuestro generador?</h5>
+            <h5><i class="fas fa-info-circle icon"></i>Formato Harvard Auténtico - Compatible ATS</h5>
             <div class="row">
                 <div class="col-md-12">
                     <ol class="mb-0">
-                        <li><strong>Frontend React/Angular:</strong> Interfaz interactiva para capturar datos</li>
-                        <li><strong>Análisis Python:</strong> IA que optimiza el contenido automáticamente</li>
-                        <li><strong>Generación automática:</strong> Crea experiencia basada en tu stack tecnológico</li>
-                        <li><strong>Vista previa en tiempo real:</strong> Visualiza cambios instantáneamente</li>
-                        <li><strong>Descarga profesional:</strong> CV optimizado en formato Harvard Word</li>
-                        <li><strong>¡Listo para aplicar!</strong> CV profesional para empresas tech</li>
+                        <li><strong>Formato Harvard Oficial:</strong> Estructura académica reconocida mundialmente</li>
+                        <li><strong>Compatible ATS:</strong> Optimizado para filtros automáticos de reclutamiento</li>
+                        <li><strong>Tipografía Estándar:</strong> Times New Roman 12pt, espaciado profesional</li>
+                        <li><strong>Estructura Limpia:</strong> Secciones claramente definidas sin elementos gráficos</li>
+                        <li><strong>Palabras Clave:</strong> Formato que maximiza la detección de habilidades</li>
+                        <li><strong>Exportación Profesional:</strong> PDF y Word listos para aplicaciones</li>
                     </ol>
                 </div>
             </div>
@@ -601,9 +619,13 @@
                     ubicacion: document.getElementById('ubicacion').value.trim(),
                     linkedin: document.getElementById('linkedin').value.trim(),
                     portfolio: document.getElementById('portfolio').value.trim(),
+                    perfilProfesional: document.getElementById('perfilProfesional').value.trim(),
                     educacion: document.getElementById('educacion').value.trim(),
                     experiencia: document.getElementById('experiencia').value.trim(),
-                    habilidades: document.getElementById('habilidades').value.trim()
+                    habilidades: document.getElementById('habilidades').value.trim(),
+                    proyectos: document.getElementById('proyectos').value.trim(),
+                    certificaciones: document.getElementById('certificaciones').value.trim(),
+                    idiomas: document.getElementById('idiomas').value.trim()
                 };
                 
                 if (datos.nombre && datos.email) {

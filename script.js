@@ -16,10 +16,13 @@ function guardarFormularioAutomatico() {
         ubicacion: document.getElementById('ubicacion').value.trim(),
         linkedin: document.getElementById('linkedin').value.trim(),
         portfolio: document.getElementById('portfolio').value.trim(),
+        perfilProfesional: document.getElementById('perfilProfesional').value.trim(),
         educacion: document.getElementById('educacion').value.trim(),
         experiencia: document.getElementById('experiencia').value.trim(),
         habilidades: document.getElementById('habilidades').value.trim(),
-        proyectos: document.getElementById('proyectos').value.trim()
+        proyectos: document.getElementById('proyectos').value.trim(),
+        certificaciones: document.getElementById('certificaciones').value.trim(),
+        idiomas: document.getElementById('idiomas').value.trim()
     };
     
     localStorage.setItem('cvFormulario', JSON.stringify(datosFormulario));
@@ -65,6 +68,7 @@ function generarCV() {
         ubicacion: document.getElementById('ubicacion').value.trim(),
         linkedin: document.getElementById('linkedin').value.trim(),
         portfolio: document.getElementById('portfolio').value.trim(),
+        perfilProfesional: document.getElementById('perfilProfesional').value.trim(),
         educacion: document.getElementById('educacion').value.trim(),
         experiencia: document.getElementById('experiencia').value.trim(),
         habilidades: document.getElementById('habilidades').value.trim(),
@@ -207,6 +211,24 @@ function generarSugerencias(keywords) {
 }
 
 // ===== FUNCIONES DE GENERACIÓN DE HTML =====
+function generarEnlaceWhatsApp(numero) {
+    if (!numero) return '';
+    // Limpiar el número de espacios y caracteres especiales, mantener solo números y +
+    const numeroLimpio = numero.replace(/[^\d+]/g, '');
+    return `https://wa.me/${numeroLimpio.startsWith('+') ? numeroLimpio.substring(1) : numeroLimpio}`;
+}
+
+function crearEnlaceHTML(url, texto, esEmail = false) {
+    if (!url) return texto || '';
+    
+    if (esEmail && !url.startsWith('mailto:')) {
+        url = 'mailto:' + url;
+    }
+    
+    // Para Word y PDF, usar estilos que mantengan los enlaces funcionales
+    return `<a href="${url}" style="color: #0000EE; text-decoration: underline;" title="${url}">${texto}</a>`;
+}
+
 function generarCVHTML(datos) {
     const fechaGeneracion = new Date().toLocaleDateString('es-ES', {
         year: 'numeric',
@@ -215,111 +237,256 @@ function generarCVHTML(datos) {
     });
     
     let html = `
-    <div style="font-family: 'Times New Roman', serif; max-width: 100%; margin: 0; color: #000; font-size: 11pt; line-height: 1.0; padding: 0;">
-        <!-- ENCABEZADO -->
-        <div style="text-align: center; border-bottom: 2px solid #000; padding-bottom: 15px; margin-bottom: 20px; line-height: 1.2;">
-            <h1 style="font-size: 24pt; margin: 0; color: #000; font-weight: bold; text-transform: uppercase;">
+    <div style="max-width: 100%; margin: 0; padding: 10px; font-family: 'Times New Roman', serif; font-size: 12pt; line-height: 1.15; color: #000000; text-align: left;">
+        <!-- ENCABEZADO FORMATO HARVARD MEJORADO -->
+        <div style="text-align: center; margin-bottom: 24pt; width: 100%;">
+            <div style="font-size: 16pt; font-weight: bold; text-transform: uppercase; letter-spacing: 1pt; margin-bottom: 12pt;">
                 ${escaparHTML(datos.nombre)}
-            </h1>
-            <div style="margin-top: 10px; font-size: 11pt;">
-                ${datos.ubicacion ? `${escaparHTML(datos.ubicacion)} • ` : ''}
-                ${datos.telefono ? `${escaparHTML(datos.telefono)} • ` : ''}
-                ${escaparHTML(datos.email)}
             </div>
-            ${datos.linkedin || datos.portfolio ? `
-            <div style="margin-top: 5px; font-size: 10pt;">
-                ${datos.linkedin ? `LinkedIn: ${escaparHTML(datos.linkedin)}` : ''}
-                ${datos.linkedin && datos.portfolio ? ' • ' : ''}
-                ${datos.portfolio ? `Portfolio: ${escaparHTML(datos.portfolio)}` : ''}
+            
+            <!-- Información de contacto organizada en líneas -->
+            <div style="font-size: 11pt; line-height: 1.4;">
+                ${datos.ubicacion ? `
+                <div style="margin-bottom: 3pt;">
+                    ${escaparHTML(datos.ubicacion)}
+                </div>
+                ` : ''}
+                
+                <div style="margin-bottom: 3pt;">
+                    ${datos.telefono ? `${crearEnlaceHTML(generarEnlaceWhatsApp(datos.telefono), escaparHTML(datos.telefono))}` : ''} 
+                    ${datos.telefono && datos.email ? ' • ' : ''}
+                    ${crearEnlaceHTML(datos.email, escaparHTML(datos.email), true)}
+                </div>
+                
+                ${(datos.linkedin || datos.portfolio) ? `
+                <div style="margin-bottom: 3pt;">
+                    ${datos.linkedin ? crearEnlaceHTML(datos.linkedin, 'LinkedIn') : ''}
+                    ${datos.linkedin && datos.portfolio ? ' • ' : ''}
+                    ${datos.portfolio ? crearEnlaceHTML(datos.portfolio, 'Portfolio') : ''}
+                </div>
+                ` : ''}
             </div>
-            ` : ''}
         </div>`;
     
-    // EDUCACIÓN
+    // PERFIL PROFESIONAL - Formato Harvard ATS
+    if (datos.perfilProfesional) {
+        html += `
+        <div style="margin-bottom: 20pt;">
+            <div style="font-size: 12pt; font-weight: bold; text-transform: uppercase; border-bottom: 1pt solid #000000; margin-bottom: 8pt; padding-bottom: 2pt;">
+                PROFESSIONAL SUMMARY
+            </div>
+            <div style="margin-left: 0pt; text-align: justify; font-size: 12pt; line-height: 1.3;">
+                ${escaparHTML(datos.perfilProfesional)}
+            </div>
+        </div>`;
+    }
+    
+    // EDUCACIÓN - Formato Harvard ATS
     if (datos.educacion) {
         html += `
-        <div style="margin-bottom: 20px;">
-            <h2 style="font-size: 14pt; color: #000; margin: 0 0 6px 0; font-weight: bold; text-transform: uppercase; border-bottom: 1px solid #000;">
+        <div style="margin-bottom: 20pt;">
+            <div style="font-size: 12pt; font-weight: bold; text-transform: uppercase; border-bottom: 1pt solid #000000; margin-bottom: 8pt; padding-bottom: 2pt;">
                 EDUCATION
-            </h2>
-            <div style="margin-left: 0px;">
-                ${formatearSeccion(datos.educacion)}
+            </div>
+            <div style="margin-left: 0pt;">
+                ${formatearSeccionHarvardATS(datos.educacion)}
             </div>
         </div>`;
     }
     
-    // EXPERIENCIA
+    // EXPERIENCIA PROFESIONAL - Formato Harvard ATS
     if (datos.experiencia) {
         html += `
-        <div style="margin-bottom: 20px;">
-            <h2 style="font-size: 14pt; color: #000; margin: 0 0 6px 0; font-weight: bold; text-transform: uppercase; border-bottom: 1px solid #000;">
-                PROFESSIONAL EXPERIENCE
-            </h2>
-            <div style="margin-left: 0px;">
-                ${formatearSeccion(datos.experiencia)}
+        <div style="margin-bottom: 20pt;">
+            <div style="font-size: 12pt; font-weight: bold; text-transform: uppercase; border-bottom: 1pt solid #000000; margin-bottom: 8pt; padding-bottom: 2pt;">
+                EXPERIENCE
+            </div>
+            <div style="margin-left: 0pt;">
+                ${formatearExperienciaHarvardATS(datos.experiencia)}
             </div>
         </div>`;
     }
     
-    // PROYECTOS
-    if (datos.proyectos) {
-        html += `
-        <div style="margin-bottom: 20px;">
-            <h2 style="font-size: 14pt; color: #000; margin: 0 0 6px 0; font-weight: bold; text-transform: uppercase; border-bottom: 1px solid #000;">
-                PROJECTS
-            </h2>
-            <div style="margin-left: 0px;">
-                ${formatearSeccion(datos.proyectos)}
-            </div>
-        </div>`;
-    }
-    
-    // HABILIDADES - OPTIMIZADA ESPECÍFICAMENTE
+    // HABILIDADES - Formato Harvard ATS
     if (datos.habilidades) {
         html += `
-        <div style="margin-bottom: 20px;">
-            <h2 style="font-size: 14pt; color: #000; margin: 0 0 6px 0; font-weight: bold; text-transform: uppercase; border-bottom: 1px solid #000;">
-                SKILLS & COMPETENCIES
-            </h2>
-            <div style="margin-left: 0px;">
-                ${formatearSeccionHabilidades(datos.habilidades)}
+        <div style="margin-bottom: 20pt;">
+            <div style="font-size: 12pt; font-weight: bold; text-transform: uppercase; border-bottom: 1pt solid #000000; margin-bottom: 8pt; padding-bottom: 2pt;">
+                SKILLS
+            </div>
+            <div style="margin-left: 0pt;">
+                ${formatearHabilidadesHarvardATS(datos.habilidades)}
             </div>
         </div>`;
     }
     
-    // CERTIFICACIONES (NUEVA SECCIÓN)
+    // PROYECTOS - Formato Harvard ATS
+    if (datos.proyectos) {
+        html += `
+        <div style="margin-bottom: 20pt;">
+            <div style="font-size: 12pt; font-weight: bold; text-transform: uppercase; border-bottom: 1pt solid #000000; margin-bottom: 8pt; padding-bottom: 2pt;">
+                PROJECTS
+            </div>
+            <div style="margin-left: 0pt;">
+                ${formatearProyectosHarvardATS(datos.proyectos)}
+            </div>
+        </div>`;
+    }
+    
+    // CERTIFICACIONES - Formato Harvard ATS
     if (datos.certificaciones) {
         html += `
-        <div style="margin-bottom: 20px;">
-            <h2 style="font-size: 14pt; color: #000; margin: 0 0 6px 0; font-weight: bold; text-transform: uppercase; border-bottom: 1px solid #000;">
+        <div style="margin-bottom: 20pt;">
+            <div style="font-size: 12pt; font-weight: bold; text-transform: uppercase; border-bottom: 1pt solid #000000; margin-bottom: 8pt; padding-bottom: 2pt;">
                 CERTIFICATIONS
-            </h2>
-            <div style="margin-left: 0px;">
-                ${formatearSeccion(datos.certificaciones)}
+            </div>
+            <div style="margin-left: 0pt;">
+                ${formatearSeccionHarvardATS(datos.certificaciones)}
             </div>
         </div>`;
     }
     
-    // IDIOMAS (NUEVA SECCIÓN)
+    // IDIOMAS - Formato Harvard ATS
     if (datos.idiomas) {
         html += `
-        <div style="margin-bottom: 20px;">
-            <h2 style="font-size: 14pt; color: #000; margin: 0 0 6px 0; font-weight: bold; text-transform: uppercase; border-bottom: 1px solid #000;">
+        <div style="margin-bottom: 20pt;">
+            <div style="font-size: 12pt; font-weight: bold; text-transform: uppercase; border-bottom: 1pt solid #000000; margin-bottom: 8pt; padding-bottom: 2pt;">
                 LANGUAGES
-            </h2>
-            <div style="margin-left: 0px;">
-                ${formatearSeccion(datos.idiomas)}
+            </div>
+            <div style="margin-left: 0pt;">
+                ${formatearSeccionHarvardATS(datos.idiomas)}
             </div>
         </div>`;
     }
     
-    // PIE DE PÁGINA
-    html += `
-        <div style="margin-top: 40px; border-top: 1px solid #ccc; padding-top: 10px; text-align: center; font-size: 10pt; color: #666;">
-            <p style="margin: 0;">${escaparHTML(datos.nombre)} - Curriculum Vitae</p>
-            <p style="margin: 0;">Generado el ${fechaGeneracion}</p>
-        </div>
-    </div>`;
+    html += `</div>`;
+    
+    return html;
+}
+
+// ===== FUNCIONES DE FORMATEO HARVARD ATS =====
+function formatearSeccionHarvardATS(texto) {
+    if (!texto) return '';
+    
+    return texto.split('\n')
+        .map(linea => {
+            const lineaTrim = linea.trim();
+            if (!lineaTrim) return '';
+            
+            // Manejar viñetas (ATS prefiere formato simple)
+            if (lineaTrim.startsWith('•')) {
+                return `<div style="margin-bottom: 2pt;">• ${escaparHTML(lineaTrim.substring(1).trim())}</div>`;
+            }
+            
+            return `<div style="margin-bottom: 4pt;">${escaparHTML(lineaTrim)}</div>`;
+        })
+        .filter(linea => linea !== '')
+        .join('');
+}
+
+function formatearExperienciaHarvardATS(texto) {
+    if (!texto) return '';
+    
+    const lineas = texto.split('\n');
+    let html = '';
+    let dentroDeExperiencia = false;
+    
+    lineas.forEach(linea => {
+        const lineaTrim = linea.trim();
+        if (!lineaTrim) return;
+        
+        // Detectar cargo (líneas que no empiezan con • y no tienen fechas obvias)
+        if (!lineaTrim.startsWith('•') && !lineaTrim.includes('•') && 
+            (lineaTrim.length < 100 || lineaTrim.match(/\b(Developer|Engineer|Manager|Analyst|Specialist|Coordinator|Director|Lead|Senior|Junior)\b/i))) {
+            
+            // Si es claramente un cargo
+            if (lineaTrim.match(/\b(Developer|Engineer|Manager|Analyst|Specialist|Coordinator|Director|Lead|Senior|Junior)\b/i)) {
+                html += `<div style="font-weight: bold; margin-top: 8pt; margin-bottom: 2pt;">${escaparHTML(lineaTrim)}</div>`;
+                dentroDeExperiencia = true;
+            }
+            // Si parece empresa y fecha
+            else if (lineaTrim.includes(',') && (lineaTrim.includes('20') || lineaTrim.includes('presente'))) {
+                html += `<div style="font-style: italic; margin-bottom: 4pt;">${escaparHTML(lineaTrim)}</div>`;
+            }
+            // Otro título
+            else {
+                html += `<div style="font-weight: bold; margin-top: 8pt; margin-bottom: 2pt;">${escaparHTML(lineaTrim)}</div>`;
+                dentroDeExperiencia = true;
+            }
+        }
+        // Manejar viñetas de responsabilidades
+        else if (lineaTrim.startsWith('•')) {
+            html += `<div style="margin-left: 12pt; margin-bottom: 2pt;">• ${escaparHTML(lineaTrim.substring(1).trim())}</div>`;
+        }
+        // Línea normal
+        else {
+            html += `<div style="margin-bottom: 4pt;">${escaparHTML(lineaTrim)}</div>`;
+        }
+    });
+    
+    return html;
+}
+
+function formatearHabilidadesHarvardATS(texto) {
+    if (!texto) return '';
+    
+    const lineas = texto.split('\n');
+    let html = '';
+    
+    lineas.forEach(linea => {
+        const lineaTrim = linea.trim();
+        if (!lineaTrim) return;
+        
+        // Si la línea contiene ":" es una categoría (formato ATS friendly)
+        if (lineaTrim.includes(':')) {
+            const partes = lineaTrim.split(':');
+            if (partes.length >= 2) {
+                const categoria = partes[0].trim();
+                const habilidades = partes.slice(1).join(':').trim();
+                
+                html += `<div style="margin-bottom: 6pt;">`;
+                html += `<span style="font-weight: bold;">${escaparHTML(categoria)}:</span> `;
+                html += `${escaparHTML(habilidades)}`;
+                html += `</div>`;
+            }
+        } 
+        // Si empieza con viñeta
+        else if (lineaTrim.startsWith('•')) {
+            html += `<div style="margin-bottom: 2pt;">• ${escaparHTML(lineaTrim.substring(1).trim())}</div>`;
+        }
+        // Línea normal
+        else {
+            html += `<div style="margin-bottom: 4pt;">${escaparHTML(lineaTrim)}</div>`;
+        }
+    });
+    
+    return html;
+}
+
+function formatearProyectosHarvardATS(texto) {
+    if (!texto) return '';
+    
+    const lineas = texto.split('\n');
+    let html = '';
+    
+    lineas.forEach(linea => {
+        const lineaTrim = linea.trim();
+        if (!lineaTrim) return;
+        
+        // Detectar título de proyecto (líneas con paréntesis de fecha o palabras clave)
+        if (lineaTrim.includes('(') && lineaTrim.includes(')') || 
+            lineaTrim.match(/\b(Platform|System|Application|Website|App|Dashboard|API|Database)\b/i)) {
+            html += `<div style="font-weight: bold; margin-top: 8pt; margin-bottom: 2pt;">${escaparHTML(lineaTrim)}</div>`;
+        }
+        // Manejar viñetas de características
+        else if (lineaTrim.startsWith('•')) {
+            html += `<div style="margin-left: 12pt; margin-bottom: 2pt;">• ${escaparHTML(lineaTrim.substring(1).trim())}</div>`;
+        }
+        // Línea normal
+        else {
+            html += `<div style="margin-bottom: 4pt;">${escaparHTML(lineaTrim)}</div>`;
+        }
+    });
     
     return html;
 }
@@ -368,6 +535,68 @@ function formatearSeccionHabilidades(texto) {
         .join('');
 }
 
+// ===== NUEVAS FUNCIONES DE FORMATEO PROFESIONAL PARA PDF =====
+function formatearSeccionProfesional(texto) {
+    if (!texto) return '';
+    
+    return texto.split('\n')
+        .map(linea => {
+            const lineaTrim = linea.trim();
+            if (!lineaTrim) return '';
+            
+            // Manejar viñetas
+            if (lineaTrim.startsWith('•')) {
+                return `<div class="lista-item">${escaparHTML(lineaTrim)}</div>`;
+            } 
+            // Manejar líneas con dos puntos (títulos/categorías)
+            else if (lineaTrim.includes(':')) {
+                const partes = lineaTrim.split(':');
+                if (partes.length >= 2) {
+                    return `<div><span class="negrita">${escaparHTML(partes[0])}:</span> ${escaparHTML(partes.slice(1).join(':'))}</div>`;
+                }
+            }
+            
+            // Detectar si es un cargo o título (líneas cortas y significativas)
+            if (lineaTrim.length < 80 && !lineaTrim.includes('.') && !lineaTrim.includes(',')) {
+                return `<div class="cargo">${escaparHTML(lineaTrim)}</div>`;
+            }
+            
+            return `<div>${escaparHTML(lineaTrim)}</div>`;
+        })
+        .join('');
+}
+
+function formatearSeccionHabilidadesProfesional(texto) {
+    if (!texto) return '';
+    
+    const lineas = texto.split('\n');
+    let html = '';
+    
+    lineas.forEach(linea => {
+        const lineaTrim = linea.trim();
+        if (!lineaTrim) return;
+        
+        // Si la línea contiene ":" es una categoría
+        if (lineaTrim.includes(':')) {
+            const partes = lineaTrim.split(':');
+            if (partes.length >= 2) {
+                html += `<div class="habilidad-categoria">${escaparHTML(partes[0])}:</div>`;
+                html += `<div style="margin-bottom: 6pt; margin-left: 12pt;">${escaparHTML(partes.slice(1).join(':').trim())}</div>`;
+            }
+        } 
+        // Si empieza con viñeta
+        else if (lineaTrim.startsWith('•')) {
+            html += `<div class="lista-item">${escaparHTML(lineaTrim)}</div>`;
+        }
+        // Línea normal
+        else {
+            html += `<div>${escaparHTML(lineaTrim)}</div>`;
+        }
+    });
+    
+    return html;
+}
+
 // ===== FUNCIONES WORD Y PDF =====
 function generarWord() {
     if (!cvData || !cvData.nombre) {
@@ -378,22 +607,36 @@ function generarWord() {
     try {
         const cvHTML = generarCVHTML(cvData);
         
-        // Crear blob con el HTML
+        // Crear blob con HTML simplificado para Word
         const blob = new Blob([`
             <html>
             <head>
                 <meta charset="utf-8">
+                <meta name="Generator" content="Microsoft Word">
                 <title>CV - ${cvData.nombre}</title>
                 <style>
                     body { 
                         font-family: 'Times New Roman', serif; 
-                        margin: 0.4in 0.4in; 
-                        color: #000; 
-                        font-size: 11pt; 
+                        margin: 0.5in; 
+                        color: #000000; 
+                        font-size: 12pt; 
                         line-height: 1.15;
                     }
-                    h1, h2 { color: #000; }
-                    @page { margin: 0.4in 0.4in; }
+                    h1, h2, h3 { 
+                        color: #000000; 
+                        font-family: 'Times New Roman', serif;
+                    }
+                    a {
+                        color: #0563C1;
+                        text-decoration: underline;
+                    }
+                    a:visited {
+                        color: #954F72;
+                    }
+                    p {
+                        margin: 0;
+                        padding: 0;
+                    }
                 </style>
             </head>
             <body>
@@ -428,56 +671,303 @@ function generarPDF() {
     }
 
     try {
+        // Actualizar botón para mostrar estado de carga
+        const pdfBtn = document.getElementById('pdfBtn');
+        const textoOriginal = pdfBtn.innerHTML;
+        pdfBtn.innerHTML = '<i class="fas fa-spinner fa-spin icon"></i>Generando PDF...';
+        pdfBtn.classList.add('pdf-loading');
+        pdfBtn.disabled = true;
+
         const cvHTML = generarCVHTML(cvData);
         
-        // Crear ventana de impresión optimizada para PDF
-        const ventanaImpresion = window.open('', '_blank');
-        ventanaImpresion.document.write(`
+        // Crear ventana de impresión optimizada para PDF con estilos profesionales
+        const ventanaImpresion = window.open('', '_blank', 'width=800,height=600,scrollbars=yes');
+        
+        const contenidoPDF = `
             <!DOCTYPE html>
-            <html>
+            <html lang="es">
             <head>
                 <meta charset="utf-8">
-                <title>CV - ${cvData.nombre}</title>
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>CV - ${cvData.nombre.replace(/[<>"'&]/g, '')}</title>
                 <style>
+                    /* Configuración de página Harvard ATS Compatible */
                     @page {
-                        margin: 0.4in;
-                        size: A4;
+                        margin: 0.5in 0.5in;
+                        size: A4 portrait;
                     }
-                    body { 
-                        font-family: 'Times New Roman', serif; 
+                    
+                    * {
+                        box-sizing: border-box;
                         margin: 0;
-                        color: #000; 
-                        font-size: 11pt; 
-                        line-height: 1.15;
-                        background: white;
+                        padding: 0;
                     }
-                    h1, h2 { color: #000; }
+                    
+                    body { 
+                        font-family: 'Times New Roman', Times, serif; 
+                        font-size: 12pt;
+                        line-height: 1.15;
+                        color: #000000;
+                        background: white;
+                        margin: 0;
+                        padding: 0;
+                        width: 100%;
+                        max-width: 100%;
+                        overflow-x: hidden;
+                        -webkit-font-smoothing: antialiased;
+                        text-align: left;
+                    }
+                    
+                    /* Estilo Harvard para títulos de sección */
+                    h1, h2, h3, h4, h5, h6 {
+                        font-family: 'Times New Roman', serif;
+                        color: #000000;
+                        font-weight: bold;
+                        page-break-after: avoid;
+                    }
+                    
+                    /* Encabezado centrado estilo Harvard */
+                    .header {
+                        text-align: center;
+                        margin-bottom: 24pt;
+                        page-break-after: avoid;
+                    }
+                    
+                    .name {
+                        font-size: 16pt;
+                        font-weight: bold;
+                        text-transform: uppercase;
+                        letter-spacing: 1pt;
+                        margin-bottom: 8pt;
+                    }
+                    
+                    /* Títulos de sección Harvard */
+                    .section-title {
+                        font-size: 12pt;
+                        font-weight: bold;
+                        text-transform: uppercase;
+                        border-bottom: 1pt solid #000000;
+                        margin-top: 16pt;
+                        margin-bottom: 8pt;
+                        padding-bottom: 2pt;
+                        page-break-after: avoid;
+                    }
+                    
+                    /* Primera sección sin margen superior */
+                    .section-title:first-of-type {
+                        margin-top: 0;
+                    }
+                    
+                    /* Contenido de sección */
+                    .section-content {
+                        margin-bottom: 16pt;
+                        page-break-inside: avoid;
+                    }
+                    
+                    /* Párrafos y divs */
+                    p, div {
+                        margin-bottom: 4pt;
+                        text-align: left;
+                        orphans: 2;
+                        widows: 2;
+                        word-wrap: break-word;
+                    }
+                    
+                    /* Información de contacto */
+                    .contact-info {
+                        font-size: 11pt;
+                        margin-bottom: 4pt;
+                    }
+                    
+                    /* Trabajos y cargos */
+                    .job-title {
+                        font-weight: bold;
+                        margin-top: 8pt;
+                        margin-bottom: 2pt;
+                    }
+                    
+                    .company-info {
+                        font-style: italic;
+                        margin-bottom: 4pt;
+                    }
+                    
+                    /* Lista de responsabilidades */
+                    .responsibility {
+                        margin-left: 12pt;
+                        margin-bottom: 2pt;
+                        text-indent: -12pt;
+                        padding-left: 12pt;
+                    }
+                    
+                    /* Habilidades categorizadas */
+                    .skill-category {
+                        font-weight: bold;
+                        display: inline;
+                    }
+                    
+                    .skill-list {
+                        display: inline;
+                        margin-left: 0;
+                    }
+                    
+                    /* Títulos de proyectos */
+                    .project-title {
+                        font-weight: bold;
+                        margin-top: 8pt;
+                        margin-bottom: 2pt;
+                    }
+                    
+                    /* Certificaciones y educación */
+                    .education-item, .cert-item {
+                        margin-bottom: 4pt;
+                    }
+                    
+                    /* Estilo para texto en negrita */
+                    .bold {
+                        font-weight: bold;
+                    }
+                    
+                    .italic {
+                        font-style: italic;
+                    }
+                    
+                    /* Evitar cortes de página problemáticos */
+                    .no-break {
+                        page-break-inside: avoid;
+                    }
+                    
+                    /* Estilos de impresión específicos ATS */
                     @media print {
-                        body { margin: 0; }
-                        .no-print { display: none; }
+                        body {
+                            margin: 0 !important;
+                            padding: 0 !important;
+                            background: white !important;
+                            -webkit-print-color-adjust: exact !important;
+                            print-color-adjust: exact !important;
+                        }
+                        
+                        .no-print {
+                            display: none !important;
+                        }
+                        
+                        /* Asegurar legibilidad ATS */
+                        * {
+                            color: #000000 !important;
+                            background: white !important;
+                            font-family: 'Times New Roman', serif !important;
+                        }
+                        
+                        /* Evitar elementos flotantes */
+                        * {
+                            float: none !important;
+                            position: static !important;
+                        }
+                        
+                        /* Asegurar que el contenido no se corte */
+                        * {
+                            overflow: visible !important;
+                        }
+                        
+                        /* Espaciado consistente */
+                        .section-title {
+                            margin-top: 16pt !important;
+                            margin-bottom: 8pt !important;
+                        }
+                        
+                        .section-content {
+                            margin-bottom: 16pt !important;
+                        }
+                    }
+                    
+                    /* Estilos específicos para compatibilidad ATS */
+                    table {
+                        border-collapse: collapse;
+                        width: 100%;
+                    }
+                    
+                    td, th {
+                        text-align: left;
+                        vertical-align: top;
+                        padding: 2pt;
+                    }
+                    
+                    /* Enlaces activos en PDF */
+                    a {
+                        color: #0000EE;
+                        text-decoration: underline;
+                    }
+                    
+                    /* Para impresión, mantener enlaces visibles */
+                    @media print {
+                        a {
+                            color: #0000EE !important;
+                            text-decoration: underline !important;
+                        }
+                        
+                        /* Mostrar URLs después del texto para PDF */
+                        a[href^="http"]:after,
+                        a[href^="mailto"]:after,
+                        a[href^="https://wa.me"]:after {
+                            content: " (" attr(href) ")";
+                            font-size: 10pt;
+                            color: #666;
+                        }
+                    }
+                    
+                    /* Asegurar que las listas sean legibles */
+                    ul, ol {
+                        margin-left: 0;
+                        padding-left: 16pt;
+                    }
+                    
+                    li {
+                        margin-bottom: 2pt;
                     }
                 </style>
             </head>
             <body>
                 ${cvHTML}
+                
                 <script>
+                    // Función para imprimir automáticamente después de cargar
                     window.onload = function() {
+                        // Dar tiempo para que se carguen los estilos
                         setTimeout(function() {
                             window.print();
-                            window.close();
                         }, 500);
-                    }
+                    };
+                    
+                    // Manejar el evento después de imprimir
+                    window.onafterprint = function() {
+                        window.close();
+                    };
+                </script>
                 </script>
             </body>
             </html>
-        `);
+        `;
         
+        ventanaImpresion.document.write(contenidoPDF);
         ventanaImpresion.document.close();
-        mostrarAlerta('¡Ventana de impresión abierta! Selecciona "Guardar como PDF" 📄', 'info');
+        
+        // Restaurar botón después de un momento
+        setTimeout(() => {
+            pdfBtn.innerHTML = textoOriginal;
+            pdfBtn.classList.remove('pdf-loading');
+            pdfBtn.disabled = false;
+        }, 2000);
+        
+        mostrarAlerta('¡PDF Formato Harvard generado! 📄 Compatible con filtros ATS - Optimizado para sistemas de reclutamiento automático', 'success');
         
     } catch (error) {
         console.error('Error al generar PDF:', error);
         mostrarAlerta('Error al generar el documento PDF.', 'danger');
+        
+        // Restaurar botón en caso de error
+        const pdfBtn = document.getElementById('pdfBtn');
+        pdfBtn.innerHTML = '<i class="fas fa-file-pdf icon"></i>Generar PDF';
+        pdfBtn.classList.remove('pdf-loading');
+        pdfBtn.disabled = false;
     }
 }
 
@@ -492,6 +982,8 @@ function cargarEjemploModerno() {
     document.getElementById('ubicacion').value = 'Barcelona, España';
     document.getElementById('linkedin').value = 'https://linkedin.com/in/alexrivera-fullstack';
     document.getElementById('portfolio').value = 'https://alexrivera.dev';
+    
+    document.getElementById('perfilProfesional').value = `Profesional egresado en ingeniería en sistemas de información, con un enfoque proactivo y autodidacta, con experiencia en desarrollo de software fullstack y administración de servidores. Me destaco por mi capacidad para aprender rápidamente y adaptarme a entornos dinámicos.`;
     
     document.getElementById('educacion').value = `Máster en Ingeniería de Software
 Universidad Politécnica de Cataluña, Barcelona
@@ -530,37 +1022,51 @@ Innovation Labs, Barcelona - Septiembre 2020 - Diciembre 2020
 • Colaboración en proyectos de machine learning con Python
 • Participación en diseño de interfaces UX/UI`;
 
-    document.getElementById('habilidades').value = `Tecnologías Frontend: React, Angular, Vue.js, TypeScript, HTML5, CSS3, SASS, Tailwind CSS, Bootstrap
+    document.getElementById('habilidades').value = `Programming Languages: Python, JavaScript, TypeScript, SQL, HTML5, CSS3
 
-Backend & APIs: Python (Django, FastAPI), Node.js (Express, NestJS), REST APIs, GraphQL, WebSockets
+Frontend Development: React, Angular, Vue.js, SASS, Tailwind CSS, Bootstrap, Responsive Design
 
-Bases de Datos: PostgreSQL, MongoDB, MySQL, Redis, Elasticsearch
+Backend Development: Django, FastAPI, Node.js, Express, REST APIs, GraphQL, Microservices
 
-Cloud & DevOps: AWS (EC2, S3, Lambda), Google Cloud, Docker, Kubernetes, CI/CD, Jenkins, GitHub Actions
+Database Management: PostgreSQL, MongoDB, MySQL, Redis, Database Design, Query Optimization
 
-Herramientas de Desarrollo: Git, VS Code, IntelliJ, Postman, Figma, Jira, Slack
+Cloud & DevOps: AWS (EC2, S3, Lambda), Google Cloud Platform, Docker, Kubernetes, CI/CD Pipelines
 
-Metodologías: Agile/Scrum, TDD, Clean Code, Design Patterns, Microservices Architecture
+Development Tools: Git, GitHub, VS Code, IntelliJ IDEA, Postman, Jira, Slack
 
-Idiomas: Español (Nativo), Inglés (C1 - Avanzado), Catalán (Nativo)`;
+Methodologies: Agile/Scrum, Test-Driven Development, Clean Code, Design Patterns`;
 
-    document.getElementById('proyectos').value = `E-commerce Platform "ShopTech" (2023)
-• Frontend: React + TypeScript + Redux Toolkit
-• Backend: Python/Django + PostgreSQL + Redis
-• Características: Carrito inteligente, pagos Stripe, admin dashboard
-• Resultado: +15,000 usuarios activos, 98% uptime
+    document.getElementById('proyectos').value = `E-commerce Platform - ShopTech (2023)
+• Developed full-stack web application using React, TypeScript, and Django
+• Implemented secure payment processing with Stripe API integration
+• Built responsive admin dashboard with real-time analytics
+• Achieved 10,000+ active users with 99.9% uptime
+• Technologies: React, Django, PostgreSQL, Redis, AWS
 
-SaaS Dashboard "AnalyticsPro" (2022)
-• Frontend: Angular + Material Design + Charts.js
-• Backend: Node.js + Express + MongoDB
-• Features: Real-time analytics, exportación de datos, multi-tenant
-• Métricas: Procesamiento de 1M+ eventos diarios
+Task Management System - ProjectFlow (2022)
+• Created collaborative project management tool for remote teams
+• Developed RESTful APIs using Node.js and Express framework
+• Integrated real-time notifications using WebSocket technology
+• Improved team productivity by 35% based on user feedback
+• Technologies: Vue.js, Node.js, MongoDB, Socket.io
 
-App Móvil "FitTracker" (2021)
-• React Native + TypeScript
-• Backend: Python/FastAPI + PostgreSQL
-• Integración con wearables y APIs de salud
-• Descargada por +5,000 usuarios en stores`;
+Data Analytics Dashboard - InsightPro (2021)
+• Built interactive data visualization platform using Python and D3.js
+• Processed large datasets with Pandas and NumPy libraries
+• Created automated reporting system reducing manual work by 60%
+• Deployed scalable solution on AWS with Docker containers
+• Technologies: Python, Flask, D3.js, PostgreSQL, Docker`;
+
+    // Agregar secciones opcionales para ejemplo completo
+    document.getElementById('certificaciones').value = `• AWS Certified Solutions Architect - Associate (2023)
+• Google Cloud Professional Developer (2022)
+• Certified Scrum Master (CSM) (2021)
+• MongoDB Certified Developer Associate (2021)`;
+
+    document.getElementById('idiomas').value = `• Spanish: Native
+• English: Advanced (C1)
+• Catalan: Native
+• French: Intermediate (B2)`;
 
     // Generar CV automáticamente
     setTimeout(() => {
@@ -719,7 +1225,7 @@ function mostrarResultadosAnalisis(analisis) {
 
 function limpiarFormulario() {
     const campos = ['nombre', 'email', 'telefono', 'ubicacion', 'linkedin', 'portfolio', 
-                   'educacion', 'experiencia', 'habilidades', 'proyectos', 'certificaciones', 'idiomas'];
+                   'perfilProfesional', 'educacion', 'experiencia', 'habilidades', 'proyectos', 'certificaciones', 'idiomas'];
     
     campos.forEach(campo => {
         const elemento = document.getElementById(campo);
@@ -769,22 +1275,28 @@ function calcularProgreso() {
         email: document.getElementById('email').value.trim(),
         telefono: document.getElementById('telefono').value.trim(),
         ubicacion: document.getElementById('ubicacion').value.trim(),
+        perfilProfesional: document.getElementById('perfilProfesional').value.trim(),
         educacion: document.getElementById('educacion').value.trim(),
         experiencia: document.getElementById('experiencia').value.trim(),
         habilidades: document.getElementById('habilidades').value.trim(),
-        proyectos: document.getElementById('proyectos').value.trim()
+        proyectos: document.getElementById('proyectos').value.trim(),
+        certificaciones: document.getElementById('certificaciones').value.trim(),
+        idiomas: document.getElementById('idiomas').value.trim()
     };
     
     // Pesos de importancia de cada campo
     const pesos = {
-        nombre: 20,      // Obligatorio
-        email: 20,       // Obligatorio
-        telefono: 5,     // Opcional pero importante
-        ubicacion: 5,    // Opcional pero importante
-        educacion: 15,   // Muy importante
-        experiencia: 20, // Muy importante
-        habilidades: 10, // Importante
-        proyectos: 5     // Útil
+        nombre: 15,              // Obligatorio
+        email: 15,               // Obligatorio
+        telefono: 5,             // Opcional pero importante
+        ubicacion: 3,            // Opcional pero importante
+        perfilProfesional: 15,   // Muy importante para Harvard
+        educacion: 15,           // Muy importante
+        experiencia: 20,         // Muy importante
+        habilidades: 8,          // Importante
+        proyectos: 4,            // Útil
+        certificaciones: 2,      // Opcional
+        idiomas: 2               // Opcional
     };
     
     let puntuacionTotal = 0;
@@ -828,10 +1340,13 @@ function calcularProgreso() {
 
 function configurarContadores() {
     const contadores = [
+        { campo: 'perfilProfesional', contador: 'perfilProfesionalCounter' },
         { campo: 'educacion', contador: 'educacionCounter' },
         { campo: 'experiencia', contador: 'experienciaCounter' },
         { campo: 'habilidades', contador: 'habilidadesCounter' },
-        { campo: 'proyectos', contador: 'proyectosCounter' }
+        { campo: 'proyectos', contador: 'proyectosCounter' },
+        { campo: 'certificaciones', contador: 'certificacionesCounter' },
+        { campo: 'idiomas', contador: 'idiomasCounter' }
     ];
     
     contadores.forEach(({ campo, contador }) => {
@@ -872,6 +1387,7 @@ function actualizarContador(elemento, contadorElemento) {
 
 function getRecomendacionMinima(campo) {
     const recomendaciones = {
+        perfilProfesional: 150,
         educacion: 100,
         experiencia: 200,
         habilidades: 100,
