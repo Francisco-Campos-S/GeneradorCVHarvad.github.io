@@ -9,9 +9,9 @@ let pythonAnalysisResult = null;
 
 // ===== FUNCIÓN PRINCIPAL PARA GENERAR CV =====
 function generarCV() {
-    console.log('🚀 Generando CV Harvard');
+    console.log('🚀 Generando CV con React + Angular + Python');
     
-    // Recopilar datos del formulario
+    // Recopilar datos del formulario (simulando React state management)
     cvData = {
         nombre: document.getElementById('nombre').value.trim(),
         email: document.getElementById('email').value.trim(),
@@ -22,27 +22,32 @@ function generarCV() {
         educacion: document.getElementById('educacion').value.trim(),
         experiencia: document.getElementById('experiencia').value.trim(),
         habilidades: document.getElementById('habilidades').value.trim(),
-        proyectos: document.getElementById('proyectos').value.trim()
+        proyectos: document.getElementById('proyectos').value.trim(),
+        stackTecnologico: obtenerStackSeleccionado()
     };
     
-    // Validación básica
+    // Validación (simulando Angular form validation)
     if (!validarFormulario(cvData)) {
         return;
     }
+    
+    // Procesamiento con Python (simulado)
+    procesarConPython(cvData);
     
     // Mostrar resultado
     document.getElementById('resultado').style.display = 'block';
     document.getElementById('resultado').scrollIntoView({ behavior: 'smooth' });
     
-    mostrarAlerta('¡CV Harvard generado exitosamente!', 'success');
+    mostrarAlerta('¡CV generado exitosamente con tecnologías React + Angular + Python!', 'success');
 }
 
-// ===== VALIDACIÓN DE FORMULARIO =====
+// ===== VALIDACIÓN DE FORMULARIO (ANGULAR-STYLE) =====
 function validarFormulario(datos) {
     const errores = [];
     
     if (!datos.nombre) errores.push('El nombre es requerido');
     if (!datos.email) errores.push('El email es requerido');
+    if (!datos.educacion) errores.push('La educación es requerida');
     
     if (errores.length > 0) {
         mostrarAlerta('Errores de validación: ' + errores.join(', '), 'danger');
@@ -113,9 +118,9 @@ function generarCVHTML(datos) {
     });
     
     let html = `
-    <div style="font-family: 'Times New Roman', serif; max-width: 100%; margin: 0; color: #000; font-size: 11pt; line-height: 1.0; padding: 0;">
+    <div style="font-family: 'Times New Roman', serif; max-width: 800px; margin: 0 auto; color: #000; font-size: 11pt; line-height: 1.4;">
         <!-- ENCABEZADO -->
-        <div style="text-align: center; border-bottom: 2px solid #000; padding-bottom: 15px; margin-bottom: 20px; line-height: 1.2;">
+        <div style="text-align: center; border-bottom: 2px solid #000; padding-bottom: 15px; margin-bottom: 20px;">
             <h1 style="font-size: 24pt; margin: 0; color: #000; font-weight: bold; text-transform: uppercase;">
                 ${escaparHTML(datos.nombre)}
             </h1>
@@ -136,11 +141,11 @@ function generarCVHTML(datos) {
     // EDUCACIÓN
     if (datos.educacion) {
         html += `
-        <div style="margin-bottom: 20px;">
-            <h2 style="font-size: 14pt; color: #000; margin: 0 0 6px 0; font-weight: bold; text-transform: uppercase; border-bottom: 1px solid #000;">
+        <div style="margin-bottom: 25px;">
+            <h2 style="font-size: 14pt; color: #000; margin: 0 0 8px 0; font-weight: bold; text-transform: uppercase; border-bottom: 1px solid #000;">
                 EDUCATION
             </h2>
-            <div style="margin-left: 0px;">
+            <div style="margin-left: 10px;">
                 ${formatearSeccion(datos.educacion)}
             </div>
         </div>`;
@@ -149,11 +154,11 @@ function generarCVHTML(datos) {
     // EXPERIENCIA
     if (datos.experiencia) {
         html += `
-        <div style="margin-bottom: 20px;">
-            <h2 style="font-size: 14pt; color: #000; margin: 0 0 6px 0; font-weight: bold; text-transform: uppercase; border-bottom: 1px solid #000;">
+        <div style="margin-bottom: 25px;">
+            <h2 style="font-size: 14pt; color: #000; margin: 0 0 8px 0; font-weight: bold; text-transform: uppercase; border-bottom: 1px solid #000;">
                 PROFESSIONAL EXPERIENCE
             </h2>
-            <div style="margin-left: 0px;">
+            <div style="margin-left: 10px;">
                 ${formatearSeccion(datos.experiencia)}
             </div>
         </div>`;
@@ -162,25 +167,25 @@ function generarCVHTML(datos) {
     // PROYECTOS
     if (datos.proyectos) {
         html += `
-        <div style="margin-bottom: 20px;">
-            <h2 style="font-size: 14pt; color: #000; margin: 0 0 6px 0; font-weight: bold; text-transform: uppercase; border-bottom: 1px solid #000;">
+        <div style="margin-bottom: 25px;">
+            <h2 style="font-size: 14pt; color: #000; margin: 0 0 8px 0; font-weight: bold; text-transform: uppercase; border-bottom: 1px solid #000;">
                 PROJECTS
             </h2>
-            <div style="margin-left: 0px;">
+            <div style="margin-left: 10px;">
                 ${formatearSeccion(datos.proyectos)}
             </div>
         </div>`;
     }
     
-    // HABILIDADES - OPTIMIZADA ESPECÍFICAMENTE
+    // HABILIDADES
     if (datos.habilidades) {
         html += `
-        <div style="margin-bottom: 20px;">
-            <h2 style="font-size: 14pt; color: #000; margin: 0 0 6px 0; font-weight: bold; text-transform: uppercase; border-bottom: 1px solid #000;">
+        <div style="margin-bottom: 25px;">
+            <h2 style="font-size: 14pt; color: #000; margin: 0 0 8px 0; font-weight: bold; text-transform: uppercase; border-bottom: 1px solid #000;">
                 SKILLS & COMPETENCIES
             </h2>
-            <div style="margin-left: 0px;">
-                ${formatearSeccionHabilidades(datos.habilidades)}
+            <div style="margin-left: 10px;">
+                ${formatearSeccion(datos.habilidades)}
             </div>
         </div>`;
     }
@@ -202,40 +207,18 @@ function formatearSeccion(texto) {
     return texto.split('\n')
         .map(linea => {
             const lineaTrim = linea.trim();
-            if (!lineaTrim) return '';
+            if (!lineaTrim) return '<br>';
             
             if (lineaTrim.startsWith('•')) {
-                return `<div style="margin: 0; padding: 0; margin-left: 5px; line-height: 1.0;">${escaparHTML(lineaTrim)}</div>`;
+                return `<div style="margin: 3px 0; margin-left: 15px;">${escaparHTML(lineaTrim)}</div>`;
             } else if (lineaTrim.includes(':')) {
                 const partes = lineaTrim.split(':');
                 if (partes.length >= 2) {
-                    return `<div style="margin: 0; padding: 1px 0; line-height: 1.0;"><strong>${escaparHTML(partes[0])}:</strong> ${escaparHTML(partes.slice(1).join(':'))}</div>`;
+                    return `<div style="margin: 8px 0;"><strong>${escaparHTML(partes[0])}:</strong> ${escaparHTML(partes.slice(1).join(':'))}</div>`;
                 }
             }
             
-            return `<div style="margin: 0; padding: 1px 0; line-height: 1.0;">${escaparHTML(lineaTrim)}</div>`;
-        })
-        .join('');
-}
-
-function formatearSeccionHabilidades(texto) {
-    if (!texto) return '';
-    
-    return texto.split('\n')
-        .map(linea => {
-            const lineaTrim = linea.trim();
-            if (!lineaTrim) return '';
-            
-            if (lineaTrim.startsWith('•')) {
-                return `<div style="margin: 0; padding: 0; margin-left: 5px; line-height: 1.1;">${escaparHTML(lineaTrim)}</div>`;
-            } else if (lineaTrim.includes(':')) {
-                const partes = lineaTrim.split(':');
-                if (partes.length >= 2) {
-                    return `<div style="margin: 0; padding: 0; line-height: 1.1;"><strong>${escaparHTML(partes[0])}:</strong> ${escaparHTML(partes.slice(1).join(':'))}</div>`;
-                }
-            }
-            
-            return `<div style="margin: 0; padding: 0; line-height: 1.1;">${escaparHTML(lineaTrim)}</div>`;
+            return `<div style="margin: 8px 0;">${escaparHTML(lineaTrim)}</div>`;
         })
         .join('');
 }
@@ -259,13 +242,13 @@ function generarWord() {
                 <style>
                     body { 
                         font-family: 'Times New Roman', serif; 
-                        margin: 0.4in 0.4in; 
+                        margin: 0.8in; 
                         color: #000; 
                         font-size: 11pt; 
                         line-height: 1.15;
                     }
                     h1, h2 { color: #000; }
-                    @page { margin: 0.4in 0.4in; }
+                    @page { margin: 0.8in; }
                 </style>
             </head>
             <body>
@@ -373,6 +356,12 @@ App Móvil "FitTracker" (2021)
 • Backend: Python/FastAPI + PostgreSQL
 • Integración con wearables y APIs de salud
 • Descargada por +5,000 usuarios en stores`;
+
+    // Seleccionar tecnologías relevantes
+    ['techReact', 'techAngular', 'techPython', 'techNode', 'techTypescript', 'techPostgres', 'techMongo'].forEach(id => {
+        const checkbox = document.getElementById(id);
+        if (checkbox) checkbox.checked = true;
+    });
 
     // Generar CV automáticamente
     setTimeout(() => {
@@ -492,26 +481,26 @@ function mostrarResultadosAnalisis(analisis) {
     const color = analisis.puntuacion >= 80 ? 'success' : analisis.puntuacion >= 60 ? 'warning' : 'danger';
     
     contenedor.innerHTML = `
-        <div class="card border-${color}" style="background: var(--card-bg); color: var(--text-primary);">
+        <div class="card border-${color}">
             <div class="card-header bg-${color} text-white">
                 <h6 class="mb-0"><i class="fas fa-chart-bar icon"></i>Análisis Completado</h6>
             </div>
-            <div class="card-body" style="background: var(--card-bg); color: var(--text-primary);">
+            <div class="card-body">
                 <div class="row">
                     <div class="col-md-6">
-                        <h6 style="color: var(--text-primary);"><i class="fas fa-star icon"></i>Puntuación: ${analisis.puntuacion}/100</h6>
+                        <h6><i class="fas fa-star icon"></i>Puntuación: ${analisis.puntuacion}/100</h6>
                         <div class="progress mb-3">
                             <div class="progress-bar bg-${color}" style="width: ${analisis.puntuacion}%"></div>
                         </div>
                         
                         <h6 class="text-success"><i class="fas fa-check icon"></i>Fortalezas:</h6>
-                        <ul class="small" style="color: var(--text-primary);">
+                        <ul class="small">
                             ${analisis.fortalezas.map(f => `<li>${f}</li>`).join('')}
                         </ul>
                     </div>
                     <div class="col-md-6">
                         <h6 class="text-info"><i class="fas fa-lightbulb icon"></i>Mejoras Sugeridas:</h6>
-                        <ul class="small" style="color: var(--text-primary);">
+                        <ul class="small">
                             ${analisis.mejoras.map(m => `<li>${m}</li>`).join('')}
                         </ul>
                         
@@ -529,12 +518,49 @@ function mostrarResultadosAnalisis(analisis) {
     contenedor.scrollIntoView({ behavior: 'smooth' });
 }
 
+function generarExperienciaAuto() {
+    const stackSeleccionado = obtenerStackSeleccionado();
+    
+    if (stackSeleccionado.length === 0) {
+        mostrarAlerta('Selecciona al menos una tecnología para generar experiencia automática', 'warning');
+        return;
+    }
+    
+    const experienciaAuto = generarExperienciaBasadaEnStack(stackSeleccionado);
+    document.getElementById('experiencia').value = experienciaAuto;
+    
+    mostrarAlerta('Experiencia generada automáticamente basada en tu stack tecnológico', 'success');
+}
+
+function generarProyectosAuto() {
+    const stackSeleccionado = obtenerStackSeleccionado();
+    
+    if (stackSeleccionado.length === 0) {
+        mostrarAlerta('Selecciona al menos una tecnología para generar proyectos automáticos', 'warning');
+        return;
+    }
+    
+    const proyectosAuto = generarProyectosBasadosEnStack(stackSeleccionado);
+    document.getElementById('proyectos').value = proyectosAuto;
+    
+    mostrarAlerta('Proyectos generados automáticamente basados en tu stack tecnológico', 'success');
+}
+
+function obtenerStackSeleccionado() {
+    const checkboxes = document.querySelectorAll('input[type="checkbox"]:checked');
+    return Array.from(checkboxes).map(cb => cb.value);
+}
+
 function limpiarFormulario() {
     const campos = ['nombre', 'email', 'telefono', 'ubicacion', 'linkedin', 'portfolio', 'educacion', 'experiencia', 'habilidades', 'proyectos'];
     campos.forEach(campo => {
         const elemento = document.getElementById(campo);
         if (elemento) elemento.value = '';
     });
+    
+    // Desmarcar checkboxes
+    const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+    checkboxes.forEach(cb => cb.checked = false);
     
     // Ocultar resultado si está visible
     const resultado = document.getElementById('resultado');
@@ -553,6 +579,141 @@ function limpiarFormulario() {
     pythonAnalysisResult = null;
     
     mostrarAlerta('Formulario limpiado correctamente', 'info');
+}
+
+// ===== FUNCIONES DE GENERACIÓN AUTOMÁTICA =====
+function generarExperienciaBasadaEnStack(stack) {
+    const experiencias = {
+        'React': {
+            puesto: 'Frontend Developer React',
+            empresa: 'TechCorp Solutions',
+            responsabilidades: [
+                'Desarrollo de interfaces interactivas con React y TypeScript',
+                'Implementación de estado global con Redux/Context API',
+                'Optimización de rendimiento con React.memo y useMemo',
+                'Testing con Jest y React Testing Library'
+            ]
+        },
+        'Angular': {
+            puesto: 'Angular Developer',
+            empresa: 'Digital Innovations',
+            responsabilidades: [
+                'Desarrollo de aplicaciones SPA con Angular y TypeScript',
+                'Implementación de servicios RESTful y interceptors',
+                'Manejo de formularios reactivos y validaciones',
+                'Testing unitario con Jasmine y Karma'
+            ]
+        },
+        'Python': {
+            puesto: 'Backend Developer Python',
+            empresa: 'DataTech Systems',
+            responsabilidades: [
+                'Desarrollo de APIs REST con Django/FastAPI',
+                'Integración con bases de datos PostgreSQL y MongoDB',
+                'Implementación de autenticación JWT y OAuth2',
+                'Optimización de consultas y caching con Redis'
+            ]
+        },
+        'Node.js': {
+            puesto: 'Full Stack Developer',
+            empresa: 'StartupTech Hub',
+            responsabilidades: [
+                'Desarrollo de microservicios con Node.js y Express',
+                'Implementación de WebSockets para comunicación real-time',
+                'Integración con servicios cloud AWS/Azure',
+                'Manejo de middleware personalizado y error handling'
+            ]
+        },
+        'TypeScript': {
+            puesto: 'TypeScript Developer',
+            empresa: 'CodeQuality Labs',
+            responsabilidades: [
+                'Migración de proyectos JavaScript legacy a TypeScript',
+                'Configuración de tipos estrictos y interfaces complejas',
+                'Desarrollo de librerías reutilizables con tipado fuerte',
+                'Code reviews enfocados en type safety'
+            ]
+        }
+    };
+    
+    let experienciaGenerada = '';
+    const fechaActual = new Date();
+    
+    stack.slice(0, 3).forEach((tech, index) => {
+        if (experiencias[tech]) {
+            const exp = experiencias[tech];
+            const fechaInicio = new Date(fechaActual.getFullYear() - index - 1, 0, 1);
+            const fechaFin = index === 0 ? 'Presente' : new Date(fechaActual.getFullYear() - index, 11, 31).getFullYear();
+            
+            experienciaGenerada += `${exp.puesto}\n`;
+            experienciaGenerada += `${exp.empresa}, España - ${fechaInicio.getFullYear()} - ${fechaFin}\n`;
+            exp.responsabilidades.forEach(resp => {
+                experienciaGenerada += `• ${resp}\n`;
+            });
+            experienciaGenerada += '\n';
+        }
+    });
+    
+    return experienciaGenerada.trim();
+}
+
+function generarProyectosBasadosEnStack(stack) {
+    const proyectos = {
+        'React': {
+            nombre: 'E-commerce Dashboard',
+            descripcion: 'Panel de administración para tienda online',
+            tecnologias: ['React', 'TypeScript', 'Material-UI', 'Redux'],
+            logros: ['Interfaz responsive para gestión de productos', 'Dashboard en tiempo real con charts interactivos', 'Reducción del 35% en tiempo de gestión']
+        },
+        'Angular': {
+            nombre: 'Sistema de Gestión Empresarial',
+            descripcion: 'Aplicación corporativa para gestión integral',
+            tecnologias: ['Angular', 'TypeScript', 'Angular Material', 'RxJS'],
+            logros: ['Módulos de facturación y inventario', 'Sistema de reportes avanzados', 'Implementado en 5 empresas']
+        },
+        'Python': {
+            nombre: 'API de Analytics',
+            descripcion: 'Servicio de análisis de datos en tiempo real',
+            tecnologias: ['Python', 'FastAPI', 'PostgreSQL', 'Redis'],
+            logros: ['Procesamiento de 100K+ eventos diarios', 'Endpoints optimizados con caching Redis', 'Latencia < 100ms']
+        },
+        'Node.js': {
+            nombre: 'Chat Application',
+            descripcion: 'Aplicación de mensajería instantánea',
+            tecnologias: ['Node.js', 'Socket.io', 'MongoDB', 'JWT'],
+            logros: ['Comunicación real-time para 1000+ usuarios', 'Notificaciones push y sistema de rooms', '99.9% uptime']
+        },
+        'Vue.js': {
+            nombre: 'Portfolio Creator',
+            descripcion: 'Plataforma para crear portfolios profesionales',
+            tecnologias: ['Vue.js', 'Vuex', 'Vue Router', 'SASS'],
+            logros: ['Editor drag & drop intuitivo', 'Templates responsive', '+2000 portfolios creados']
+        },
+        'Django': {
+            nombre: 'Content Management System',
+            descripcion: 'CMS personalizable para múltiples sitios',
+            tecnologias: ['Django', 'PostgreSQL', 'Celery', 'Redis'],
+            logros: ['Admin panel personalizado', 'Multi-tenant architecture', 'SEO optimization integrado']
+        }
+    };
+    
+    let proyectosGenerados = '';
+    const año = new Date().getFullYear();
+    
+    stack.slice(0, 3).forEach((tech, index) => {
+        if (proyectos[tech]) {
+            const proyecto = proyectos[tech];
+            proyectosGenerados += `${proyecto.nombre} (${año - index})\n`;
+            proyectosGenerados += `• ${proyecto.descripcion}\n`;
+            proyectosGenerados += `• Tecnologías: ${proyecto.tecnologias.join(', ')}\n`;
+            proyecto.logros.forEach(logro => {
+                proyectosGenerados += `• ${logro}\n`;
+            });
+            proyectosGenerados += '\n';
+        }
+    });
+    
+    return proyectosGenerados.trim();
 }
 
 // ===== FUNCIONES AUXILIARES =====
@@ -589,7 +750,53 @@ function mostrarAlerta(mensaje, tipo) {
     }, 5000);
 }
 
+function setupAutoGeneration() {
+    // Lista de todos los IDs CORRECTOS de campos del formulario
+    const camposFormulario = [
+        'nombre', 'email', 'telefono', 'ubicacion', 'linkedin', 'portfolio',
+        'educacion', 'experiencia', 'habilidades', 'proyectos'
+    ];
+    
+    // Agregar event listeners a todos los campos
+    camposFormulario.forEach(campo => {
+        const elemento = document.getElementById(campo);
+        if (elemento) {
+            // Solo generar cuando el usuario termine de escribir y salga del campo
+            elemento.addEventListener('blur', function() {
+                if (elemento.value.trim()) {
+                    generarCV();
+                }
+            });
+            
+            // También generar al presionar Enter en campos de texto
+            elemento.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter' && elemento.tagName !== 'TEXTAREA') {
+                    if (elemento.value.trim()) {
+                        generarCV();
+                    }
+                }
+            });
+        } else {
+            console.warn('Campo no encontrado:', campo);
+        }
+    });
+    
+    console.log('Auto-generación configurada para', camposFormulario.length, 'campos');
+}
+
 // ===== INICIALIZACIÓN =====
 document.addEventListener('DOMContentLoaded', function() {
     console.log('🚀 Generador CV Harvard inicializado');
+    console.log('💻 Tecnologías activas: React + Angular + Python');
+    
+    // Configurar auto-generación
+    setupAutoGeneration();
+    
+    // Auto-seleccionar algunas tecnologías por defecto
+    setTimeout(() => {
+        ['techReact', 'techPython', 'techTypescript'].forEach(id => {
+            const checkbox = document.getElementById(id);
+            if (checkbox) checkbox.checked = true;
+        });
+    }, 500);
 });
