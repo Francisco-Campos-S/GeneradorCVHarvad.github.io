@@ -237,29 +237,29 @@ function generarCVHTML(datos) {
     });
     
     let html = `
-    <div style="max-width: 100%; margin: 0; padding: 10px; font-family: 'Times New Roman', serif; font-size: 12pt; line-height: 1.15; color: #000000; text-align: left;">
-        <!-- ENCABEZADO FORMATO HARVARD MEJORADO -->
-        <div style="text-align: center; margin-bottom: 24pt; width: 100%;">
-            <div style="font-size: 16pt; font-weight: bold; text-transform: uppercase; letter-spacing: 1pt; margin-bottom: 12pt;">
+    <div style="max-width: 100%; margin: 0; padding: 10px; font-family: 'Times New Roman', serif; font-size: 12pt; line-height: 1.15; color: #000000;">
+        <!-- ENCABEZADO FORMATO HARVARD CENTRADO -->
+        <div style="text-align: center !important; margin-bottom: 24pt; width: 100%;">
+            <div style="font-size: 16pt; font-weight: bold; text-transform: uppercase; letter-spacing: 1pt; margin-bottom: 12pt; text-align: center !important;">
                 ${escaparHTML(datos.nombre)}
             </div>
             
-            <!-- Información de contacto organizada en líneas -->
-            <div style="font-size: 11pt; line-height: 1.4;">
+            <!-- Información de contacto centrada -->
+            <div style="font-size: 11pt; line-height: 1.4; text-align: center !important;">
                 ${datos.ubicacion ? `
-                <div style="margin-bottom: 3pt;">
+                <div style="margin-bottom: 3pt; text-align: center !important;">
                     ${escaparHTML(datos.ubicacion)}
                 </div>
                 ` : ''}
                 
-                <div style="margin-bottom: 3pt;">
+                <div style="margin-bottom: 3pt; text-align: center !important;">
                     ${datos.telefono ? `${crearEnlaceHTML(generarEnlaceWhatsApp(datos.telefono), escaparHTML(datos.telefono))}` : ''} 
                     ${datos.telefono && datos.email ? ' • ' : ''}
                     ${crearEnlaceHTML(datos.email, escaparHTML(datos.email), true)}
                 </div>
                 
                 ${(datos.linkedin || datos.portfolio) ? `
-                <div style="margin-bottom: 3pt;">
+                <div style="margin-bottom: 3pt; text-align: center !important;">
                     ${datos.linkedin ? crearEnlaceHTML(datos.linkedin, 'LinkedIn') : ''}
                     ${datos.linkedin && datos.portfolio ? ' • ' : ''}
                     ${datos.portfolio ? crearEnlaceHTML(datos.portfolio, 'Portfolio') : ''}
@@ -633,9 +633,13 @@ function generarWord() {
                     a:visited {
                         color: #954F72;
                     }
-                    p {
+                    p, div {
                         margin: 0;
                         padding: 0;
+                    }
+                    /* Asegurar centrado del encabezado */
+                    div[style*="text-align: center"] {
+                        text-align: center !important;
                     }
                 </style>
             </head>
@@ -680,275 +684,66 @@ function generarPDF() {
 
         const cvHTML = generarCVHTML(cvData);
         
-        // Crear ventana de impresión optimizada para PDF con estilos profesionales
-        const ventanaImpresion = window.open('', '_blank', 'width=800,height=600,scrollbars=yes');
+        // Crear contenido HTML completamente independiente
+        const contenidoLimpio = `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>${cvData.nombre.replace(/[<>"'&]/g, '')}</title>
+    <style>
+        @page { 
+            margin: 0.5in; 
+            size: A4; 
+        }
+        body { 
+            font-family: 'Times New Roman', serif; 
+            font-size: 12pt; 
+            line-height: 1.15; 
+            color: #000; 
+            background: white; 
+            margin: 0; 
+            padding: 0; 
+        }
+        div[style*="text-align: center"] { text-align: center !important; }
+        a { color: #0563C1; text-decoration: underline; }
+        @media print {
+            * { -webkit-print-color-adjust: exact !important; }
+            body { margin: 0 !important; padding: 0 !important; }
+        }
+    </style>
+</head>
+<body>
+${cvHTML}
+<script>
+    window.onload = function() {
+        document.title = "${cvData.nombre.replace(/[<>"'&]/g, '')}";
+        setTimeout(() => { window.print(); setTimeout(() => window.close(), 1000); }, 500);
+    };
+</script>
+</body>
+</html>`;
+
+        // Usar data URL para evitar mostrar la URL del servidor
+        const dataUrl = 'data:text/html;charset=utf-8,' + encodeURIComponent(contenidoLimpio);
         
-        const contenidoPDF = `
-            <!DOCTYPE html>
-            <html lang="es">
-            <head>
-                <meta charset="utf-8">
-                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <title>CV - ${cvData.nombre.replace(/[<>"'&]/g, '')}</title>
-                <style>
-                    /* Configuración de página Harvard ATS Compatible */
-                    @page {
-                        margin: 0.5in 0.5in;
-                        size: A4 portrait;
-                    }
-                    
-                    * {
-                        box-sizing: border-box;
-                        margin: 0;
-                        padding: 0;
-                    }
-                    
-                    body { 
-                        font-family: 'Times New Roman', Times, serif; 
-                        font-size: 12pt;
-                        line-height: 1.15;
-                        color: #000000;
-                        background: white;
-                        margin: 0;
-                        padding: 0;
-                        width: 100%;
-                        max-width: 100%;
-                        overflow-x: hidden;
-                        -webkit-font-smoothing: antialiased;
-                        text-align: left;
-                    }
-                    
-                    /* Estilo Harvard para títulos de sección */
-                    h1, h2, h3, h4, h5, h6 {
-                        font-family: 'Times New Roman', serif;
-                        color: #000000;
-                        font-weight: bold;
-                        page-break-after: avoid;
-                    }
-                    
-                    /* Encabezado centrado estilo Harvard */
-                    .header {
-                        text-align: center;
-                        margin-bottom: 24pt;
-                        page-break-after: avoid;
-                    }
-                    
-                    .name {
-                        font-size: 16pt;
-                        font-weight: bold;
-                        text-transform: uppercase;
-                        letter-spacing: 1pt;
-                        margin-bottom: 8pt;
-                    }
-                    
-                    /* Títulos de sección Harvard */
-                    .section-title {
-                        font-size: 12pt;
-                        font-weight: bold;
-                        text-transform: uppercase;
-                        border-bottom: 1pt solid #000000;
-                        margin-top: 16pt;
-                        margin-bottom: 8pt;
-                        padding-bottom: 2pt;
-                        page-break-after: avoid;
-                    }
-                    
-                    /* Primera sección sin margen superior */
-                    .section-title:first-of-type {
-                        margin-top: 0;
-                    }
-                    
-                    /* Contenido de sección */
-                    .section-content {
-                        margin-bottom: 16pt;
-                        page-break-inside: avoid;
-                    }
-                    
-                    /* Párrafos y divs */
-                    p, div {
-                        margin-bottom: 4pt;
-                        text-align: left;
-                        orphans: 2;
-                        widows: 2;
-                        word-wrap: break-word;
-                    }
-                    
-                    /* Información de contacto */
-                    .contact-info {
-                        font-size: 11pt;
-                        margin-bottom: 4pt;
-                    }
-                    
-                    /* Trabajos y cargos */
-                    .job-title {
-                        font-weight: bold;
-                        margin-top: 8pt;
-                        margin-bottom: 2pt;
-                    }
-                    
-                    .company-info {
-                        font-style: italic;
-                        margin-bottom: 4pt;
-                    }
-                    
-                    /* Lista de responsabilidades */
-                    .responsibility {
-                        margin-left: 12pt;
-                        margin-bottom: 2pt;
-                        text-indent: -12pt;
-                        padding-left: 12pt;
-                    }
-                    
-                    /* Habilidades categorizadas */
-                    .skill-category {
-                        font-weight: bold;
-                        display: inline;
-                    }
-                    
-                    .skill-list {
-                        display: inline;
-                        margin-left: 0;
-                    }
-                    
-                    /* Títulos de proyectos */
-                    .project-title {
-                        font-weight: bold;
-                        margin-top: 8pt;
-                        margin-bottom: 2pt;
-                    }
-                    
-                    /* Certificaciones y educación */
-                    .education-item, .cert-item {
-                        margin-bottom: 4pt;
-                    }
-                    
-                    /* Estilo para texto en negrita */
-                    .bold {
-                        font-weight: bold;
-                    }
-                    
-                    .italic {
-                        font-style: italic;
-                    }
-                    
-                    /* Evitar cortes de página problemáticos */
-                    .no-break {
-                        page-break-inside: avoid;
-                    }
-                    
-                    /* Estilos de impresión específicos ATS */
-                    @media print {
-                        body {
-                            margin: 0 !important;
-                            padding: 0 !important;
-                            background: white !important;
-                            -webkit-print-color-adjust: exact !important;
-                            print-color-adjust: exact !important;
-                        }
-                        
-                        .no-print {
-                            display: none !important;
-                        }
-                        
-                        /* Asegurar legibilidad ATS */
-                        * {
-                            color: #000000 !important;
-                            background: white !important;
-                            font-family: 'Times New Roman', serif !important;
-                        }
-                        
-                        /* Evitar elementos flotantes */
-                        * {
-                            float: none !important;
-                            position: static !important;
-                        }
-                        
-                        /* Asegurar que el contenido no se corte */
-                        * {
-                            overflow: visible !important;
-                        }
-                        
-                        /* Espaciado consistente */
-                        .section-title {
-                            margin-top: 16pt !important;
-                            margin-bottom: 8pt !important;
-                        }
-                        
-                        .section-content {
-                            margin-bottom: 16pt !important;
-                        }
-                    }
-                    
-                    /* Estilos específicos para compatibilidad ATS */
-                    table {
-                        border-collapse: collapse;
-                        width: 100%;
-                    }
-                    
-                    td, th {
-                        text-align: left;
-                        vertical-align: top;
-                        padding: 2pt;
-                    }
-                    
-                    /* Enlaces activos en PDF */
-                    a {
-                        color: #0000EE;
-                        text-decoration: underline;
-                    }
-                    
-                    /* Para impresión, mantener enlaces visibles */
-                    @media print {
-                        a {
-                            color: #0000EE !important;
-                            text-decoration: underline !important;
-                        }
-                        
-                        /* Mostrar URLs después del texto para PDF */
-                        a[href^="http"]:after,
-                        a[href^="mailto"]:after,
-                        a[href^="https://wa.me"]:after {
-                            content: " (" attr(href) ")";
-                            font-size: 10pt;
-                            color: #666;
-                        }
-                    }
-                    
-                    /* Asegurar que las listas sean legibles */
-                    ul, ol {
-                        margin-left: 0;
-                        padding-left: 16pt;
-                    }
-                    
-                    li {
-                        margin-bottom: 2pt;
-                    }
-                </style>
-            </head>
-            <body>
-                ${cvHTML}
-                
-                <script>
-                    // Función para imprimir automáticamente después de cargar
-                    window.onload = function() {
-                        // Dar tiempo para que se carguen los estilos
-                        setTimeout(function() {
-                            window.print();
-                        }, 500);
-                    };
-                    
-                    // Manejar el evento después de imprimir
-                    window.onafterprint = function() {
-                        window.close();
-                    };
-                </script>
-                </script>
-            </body>
-            </html>
-        `;
+        // Crear ventana con data URL
+        const ventanaPDF = window.open(dataUrl, '_blank', 'width=800,height=600');
         
-        ventanaImpresion.document.write(contenidoPDF);
-        ventanaImpresion.document.close();
+        if (!ventanaPDF) {
+            // Fallback: crear archivo descargable
+            const blob = new Blob([contenidoLimpio], { type: 'text/html;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const enlace = document.createElement('a');
+            enlace.href = url;
+            enlace.download = `${cvData.nombre.replace(/[^a-zA-Z0-9\s]/g, '').trim().replace(/\s+/g, '-')}-CV.html`;
+            document.body.appendChild(enlace);
+            enlace.click();
+            document.body.removeChild(enlace);
+            URL.revokeObjectURL(url);
+            
+            mostrarAlerta('CV descargado como archivo HTML. Ábrelo y usa Ctrl+P para imprimir a PDF.', 'info');
+        }
         
         // Restaurar botón después de un momento
         setTimeout(() => {
@@ -957,7 +752,7 @@ function generarPDF() {
             pdfBtn.disabled = false;
         }, 2000);
         
-        mostrarAlerta('¡PDF Formato Harvard generado! 📄 Compatible con filtros ATS - Optimizado para sistemas de reclutamiento automático', 'success');
+        mostrarAlerta('¡PDF Formato Harvard generado! 📄 Compatible con filtros ATS', 'success');
         
     } catch (error) {
         console.error('Error al generar PDF:', error);
