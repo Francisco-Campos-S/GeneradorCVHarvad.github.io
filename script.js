@@ -237,29 +237,30 @@ function generarCVHTML(datos) {
     });
     
     let html = `
-    <div style="max-width: 100%; margin: 0; padding: 10px; font-family: 'Times New Roman', serif; font-size: 12pt; line-height: 1.15; color: #000000;">
-        <!-- ENCABEZADO FORMATO HARVARD CENTRADO -->
-        <div style="text-align: center !important; margin-bottom: 24pt; width: 100%;">
-            <div style="font-size: 16pt; font-weight: bold; text-transform: uppercase; letter-spacing: 1pt; margin-bottom: 12pt; text-align: center !important;">
+    <div style="max-width: 100%; margin: 0; padding: 10px; font-family: 'Times New Roman', serif; font-size: 12pt; line-height: 1.15; color: #000000; text-align: left;">
+        <!-- ENCABEZADO FORMATO HARVARD - SOLO NOMBRE CENTRADO -->
+        <div style="margin-bottom: 24pt; width: 100%;">
+            <!-- Solo el nombre centrado -->
+            <div style="font-size: 16pt; font-weight: bold; text-transform: uppercase; letter-spacing: 1pt; margin-bottom: 12pt; text-align: center;">
                 ${escaparHTML(datos.nombre)}
             </div>
             
             <!-- Información de contacto centrada -->
-            <div style="font-size: 11pt; line-height: 1.4; text-align: center !important;">
+            <div style="font-size: 11pt; line-height: 1.4; text-align: center;">
                 ${datos.ubicacion ? `
-                <div style="margin-bottom: 3pt; text-align: center !important;">
+                <div style="margin-bottom: 3pt;">
                     ${escaparHTML(datos.ubicacion)}
                 </div>
                 ` : ''}
                 
-                <div style="margin-bottom: 3pt; text-align: center !important;">
+                <div style="margin-bottom: 3pt;">
                     ${datos.telefono ? `${crearEnlaceHTML(generarEnlaceWhatsApp(datos.telefono), escaparHTML(datos.telefono))}` : ''} 
                     ${datos.telefono && datos.email ? ' • ' : ''}
                     ${crearEnlaceHTML(datos.email, escaparHTML(datos.email), true)}
                 </div>
                 
                 ${(datos.linkedin || datos.portfolio) ? `
-                <div style="margin-bottom: 3pt; text-align: center !important;">
+                <div style="margin-bottom: 3pt;">
                     ${datos.linkedin ? crearEnlaceHTML(datos.linkedin, 'LinkedIn') : ''}
                     ${datos.linkedin && datos.portfolio ? ' • ' : ''}
                     ${datos.portfolio ? crearEnlaceHTML(datos.portfolio, 'Portfolio') : ''}
@@ -272,10 +273,10 @@ function generarCVHTML(datos) {
     if (datos.perfilProfesional) {
         html += `
         <div style="margin-bottom: 20pt;">
-            <div style="font-size: 12pt; font-weight: bold; text-transform: uppercase; border-bottom: 1pt solid #000000; margin-bottom: 8pt; padding-bottom: 2pt;">
+            <div style="font-size: 12pt; font-weight: bold; text-transform: uppercase; border-bottom: 1pt solid #000000; margin-bottom: 8pt; padding-bottom: 2pt; text-align: left;">
                 PROFESSIONAL SUMMARY
             </div>
-            <div style="margin-left: 0pt; text-align: justify; font-size: 12pt; line-height: 1.3;">
+            <div style="margin-left: 0pt; text-align: left; font-size: 12pt; line-height: 1.3;">
                 ${escaparHTML(datos.perfilProfesional)}
             </div>
         </div>`;
@@ -285,7 +286,7 @@ function generarCVHTML(datos) {
     if (datos.educacion) {
         html += `
         <div style="margin-bottom: 20pt;">
-            <div style="font-size: 12pt; font-weight: bold; text-transform: uppercase; border-bottom: 1pt solid #000000; margin-bottom: 8pt; padding-bottom: 2pt;">
+            <div style="font-size: 12pt; font-weight: bold; text-transform: uppercase; border-bottom: 1pt solid #000000; margin-bottom: 8pt; padding-bottom: 2pt; text-align: left;">
                 EDUCATION
             </div>
             <div style="margin-left: 0pt;">
@@ -298,7 +299,7 @@ function generarCVHTML(datos) {
     if (datos.experiencia) {
         html += `
         <div style="margin-bottom: 20pt;">
-            <div style="font-size: 12pt; font-weight: bold; text-transform: uppercase; border-bottom: 1pt solid #000000; margin-bottom: 8pt; padding-bottom: 2pt;">
+            <div style="font-size: 12pt; font-weight: bold; text-transform: uppercase; border-bottom: 1pt solid #000000; margin-bottom: 8pt; padding-bottom: 2pt; text-align: left;">
                 EXPERIENCE
             </div>
             <div style="margin-left: 0pt;">
@@ -311,7 +312,7 @@ function generarCVHTML(datos) {
     if (datos.habilidades) {
         html += `
         <div style="margin-bottom: 20pt;">
-            <div style="font-size: 12pt; font-weight: bold; text-transform: uppercase; border-bottom: 1pt solid #000000; margin-bottom: 8pt; padding-bottom: 2pt;">
+            <div style="font-size: 12pt; font-weight: bold; text-transform: uppercase; border-bottom: 1pt solid #000000; margin-bottom: 8pt; padding-bottom: 2pt; text-align: left;">
                 SKILLS
             </div>
             <div style="margin-left: 0pt;">
@@ -324,7 +325,7 @@ function generarCVHTML(datos) {
     if (datos.proyectos) {
         html += `
         <div style="margin-bottom: 20pt;">
-            <div style="font-size: 12pt; font-weight: bold; text-transform: uppercase; border-bottom: 1pt solid #000000; margin-bottom: 8pt; padding-bottom: 2pt;">
+            <div style="font-size: 12pt; font-weight: bold; text-transform: uppercase; border-bottom: 1pt solid #000000; margin-bottom: 8pt; padding-bottom: 2pt; text-align: left;">
                 PROJECTS
             </div>
             <div style="margin-left: 0pt;">
@@ -337,7 +338,7 @@ function generarCVHTML(datos) {
     if (datos.certificaciones) {
         html += `
         <div style="margin-bottom: 20pt;">
-            <div style="font-size: 12pt; font-weight: bold; text-transform: uppercase; border-bottom: 1pt solid #000000; margin-bottom: 8pt; padding-bottom: 2pt;">
+            <div style="font-size: 12pt; font-weight: bold; text-transform: uppercase; border-bottom: 1pt solid #000000; margin-bottom: 8pt; padding-bottom: 2pt; text-align: left;">
                 CERTIFICATIONS
             </div>
             <div style="margin-left: 0pt;">
@@ -350,7 +351,7 @@ function generarCVHTML(datos) {
     if (datos.idiomas) {
         html += `
         <div style="margin-bottom: 20pt;">
-            <div style="font-size: 12pt; font-weight: bold; text-transform: uppercase; border-bottom: 1pt solid #000000; margin-bottom: 8pt; padding-bottom: 2pt;">
+            <div style="font-size: 12pt; font-weight: bold; text-transform: uppercase; border-bottom: 1pt solid #000000; margin-bottom: 8pt; padding-bottom: 2pt; text-align: left;">
                 LANGUAGES
             </div>
             <div style="margin-left: 0pt;">
@@ -598,6 +599,117 @@ function formatearSeccionHabilidadesProfesional(texto) {
 }
 
 // ===== FUNCIONES WORD Y PDF =====
+
+// Función específica para generar HTML optimizado para Word
+function generarCVHTMLParaWord(datos) {
+    let html = `
+    <div style="margin: 0; padding: 0; font-family: 'Times New Roman', serif; font-size: 12pt; line-height: 1.15; color: #000000;">
+        <!-- ENCABEZADO CENTRADO -->
+        <div style="text-align: center; margin-bottom: 24pt;">
+            <div style="font-size: 16pt; font-weight: bold; text-transform: uppercase; letter-spacing: 1pt; margin-bottom: 12pt;">
+                ${escaparHTML(datos.nombre)}
+            </div>
+            
+            <div style="font-size: 11pt; line-height: 1.4;">
+                ${datos.ubicacion ? `${escaparHTML(datos.ubicacion)}<br>` : ''}
+                ${datos.telefono ? `${crearEnlaceHTML(generarEnlaceWhatsApp(datos.telefono), escaparHTML(datos.telefono))}` : ''} 
+                ${datos.telefono && datos.email ? ' • ' : ''}
+                ${crearEnlaceHTML(datos.email, escaparHTML(datos.email), true)}<br>
+                ${datos.linkedin ? crearEnlaceHTML(datos.linkedin, 'LinkedIn') : ''}
+                ${datos.linkedin && datos.portfolio ? ' • ' : ''}
+                ${datos.portfolio ? crearEnlaceHTML(datos.portfolio, 'Portfolio') : ''}
+            </div>
+        </div>`;
+    
+    // TODAS LAS SECCIONES CON ALINEACIÓN IZQUIERDA FORZADA
+    if (datos.perfilProfesional) {
+        html += `
+        <div style="margin-bottom: 20pt; text-align: left;">
+            <div style="font-size: 12pt; font-weight: bold; text-transform: uppercase; border-bottom: 1pt solid #000000; margin-bottom: 8pt; padding-bottom: 2pt; text-align: left;">
+                PROFESSIONAL SUMMARY
+            </div>
+            <div style="text-align: left; font-size: 12pt; line-height: 1.3;">
+                ${escaparHTML(datos.perfilProfesional)}
+            </div>
+        </div>`;
+    }
+    
+    if (datos.educacion) {
+        html += `
+        <div style="margin-bottom: 20pt; text-align: left;">
+            <div style="font-size: 12pt; font-weight: bold; text-transform: uppercase; border-bottom: 1pt solid #000000; margin-bottom: 8pt; padding-bottom: 2pt; text-align: left;">
+                EDUCATION
+            </div>
+            <div style="text-align: left;">
+                ${formatearSeccionHarvardATS(datos.educacion)}
+            </div>
+        </div>`;
+    }
+    
+    if (datos.experiencia) {
+        html += `
+        <div style="margin-bottom: 20pt; text-align: left;">
+            <div style="font-size: 12pt; font-weight: bold; text-transform: uppercase; border-bottom: 1pt solid #000000; margin-bottom: 8pt; padding-bottom: 2pt; text-align: left;">
+                EXPERIENCE
+            </div>
+            <div style="text-align: left;">
+                ${formatearExperienciaHarvardATS(datos.experiencia)}
+            </div>
+        </div>`;
+    }
+    
+    if (datos.habilidades) {
+        html += `
+        <div style="margin-bottom: 20pt; text-align: left;">
+            <div style="font-size: 12pt; font-weight: bold; text-transform: uppercase; border-bottom: 1pt solid #000000; margin-bottom: 8pt; padding-bottom: 2pt; text-align: left;">
+                SKILLS
+            </div>
+            <div style="text-align: left;">
+                ${formatearHabilidadesHarvardATS(datos.habilidades)}
+            </div>
+        </div>`;
+    }
+    
+    if (datos.proyectos) {
+        html += `
+        <div style="margin-bottom: 20pt; text-align: left;">
+            <div style="font-size: 12pt; font-weight: bold; text-transform: uppercase; border-bottom: 1pt solid #000000; margin-bottom: 8pt; padding-bottom: 2pt; text-align: left;">
+                PROJECTS
+            </div>
+            <div style="text-align: left;">
+                ${formatearProyectosHarvardATS(datos.proyectos)}
+            </div>
+        </div>`;
+    }
+    
+    if (datos.certificaciones) {
+        html += `
+        <div style="margin-bottom: 20pt; text-align: left;">
+            <div style="font-size: 12pt; font-weight: bold; text-transform: uppercase; border-bottom: 1pt solid #000000; margin-bottom: 8pt; padding-bottom: 2pt; text-align: left;">
+                CERTIFICATIONS
+            </div>
+            <div style="text-align: left;">
+                ${formatearSeccionHarvardATS(datos.certificaciones)}
+            </div>
+        </div>`;
+    }
+    
+    if (datos.idiomas) {
+        html += `
+        <div style="margin-bottom: 20pt; text-align: left;">
+            <div style="font-size: 12pt; font-weight: bold; text-transform: uppercase; border-bottom: 1pt solid #000000; margin-bottom: 8pt; padding-bottom: 2pt; text-align: left;">
+                LANGUAGES
+            </div>
+            <div style="text-align: left;">
+                ${formatearSeccionHarvardATS(datos.idiomas)}
+            </div>
+        </div>`;
+    }
+    
+    html += `</div>`;
+    return html;
+}
+
 function generarWord() {
     if (!cvData || !cvData.nombre) {
         mostrarAlerta('Primero genera el CV antes de descargarlo', 'warning');
@@ -605,7 +717,7 @@ function generarWord() {
     }
 
     try {
-        const cvHTML = generarCVHTML(cvData);
+        const cvHTML = generarCVHTMLParaWord(cvData);
         
         // Crear blob con HTML simplificado para Word
         const blob = new Blob([`
@@ -636,10 +748,6 @@ function generarWord() {
                     p, div {
                         margin: 0;
                         padding: 0;
-                    }
-                    /* Asegurar centrado del encabezado */
-                    div[style*="text-align: center"] {
-                        text-align: center !important;
                     }
                 </style>
             </head>
@@ -682,20 +790,21 @@ function generarPDF() {
         pdfBtn.classList.add('pdf-loading');
         pdfBtn.disabled = true;
 
-        const cvHTML = generarCVHTML(cvData);
+        const cvHTML = generarCVHTMLParaWord(cvData);
         
-        // Crear contenido HTML completamente independiente
-        const contenidoLimpio = `
+        // Crear ventana nueva para impresión
+        const ventanaPDF = window.open('', '_blank');
+        
+        if (ventanaPDF) {
+            // Escribir contenido directamente
+            ventanaPDF.document.write(`
 <!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8">
     <title>${cvData.nombre.replace(/[<>"'&]/g, '')}</title>
     <style>
-        @page { 
-            margin: 0.5in; 
-            size: A4; 
-        }
+        @page { margin: 0.5in; size: A4; }
         body { 
             font-family: 'Times New Roman', serif; 
             font-size: 12pt; 
@@ -704,8 +813,85 @@ function generarPDF() {
             background: white; 
             margin: 0; 
             padding: 0; 
+            text-align: left !important;
         }
-        div[style*="text-align: center"] { text-align: center !important; }
+        /* Forzar alineación izquierda para todo por defecto */
+        * {
+            text-align: left !important;
+        }
+        p, div {
+            text-align: left !important;
+        }
+        /* SOLO centrar el nombre y contacto específicamente */
+        div[style*="font-size: 16pt"] {
+            text-align: center !important;
+        }
+        div[style*="font-size: 11pt"][style*="line-height: 1.4"] {
+            text-align: center !important;
+        }
+        /* Asegurar que elementos con center explícito se centren */
+        div[style*="text-align: center"] {
+            text-align: center !important;
+        }
+        a { color: #0563C1; text-decoration: underline; }
+        @media print {
+            * { -webkit-print-color-adjust: exact !important; }
+            body { margin: 0 !important; padding: 0 !important; text-align: left !important; }
+        }
+    </style>
+</head>
+<body>
+${cvHTML}
+<script>
+    document.title = "${cvData.nombre.replace(/[<>"'&]/g, '')}";
+    window.onload = function() {
+        setTimeout(function() {
+            window.print();
+            setTimeout(function() {
+                window.close();
+            }, 1000);
+        }, 500);
+    };
+</script>
+</body>
+</html>`);
+            
+            ventanaPDF.document.close();
+        } else {
+            // Si no se puede abrir ventana, crear descarga directa
+            const contenidoHTML = `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>${cvData.nombre.replace(/[<>"'&]/g, '')}</title>
+    <style>
+        @page { margin: 0.5in; size: A4; }
+        body { 
+            font-family: 'Times New Roman', serif; 
+            font-size: 12pt; 
+            line-height: 1.15; 
+            color: #000; 
+            background: white; 
+            margin: 0; 
+            padding: 0; 
+            text-align: left !important;
+        }
+        /* Forzar alineación izquierda para todo por defecto */
+        * {
+            text-align: left !important;
+        }
+        /* SOLO centrar el nombre y contacto específicamente */
+        div[style*="font-size: 16pt"] {
+            text-align: center !important;
+        }
+        div[style*="font-size: 11pt"][style*="line-height: 1.4"] {
+            text-align: center !important;
+        }
+        /* Asegurar que elementos con center explícito se centren */
+        div[style*="text-align: center"] {
+            text-align: center !important;
+        }
         a { color: #0563C1; text-decoration: underline; }
         @media print {
             * { -webkit-print-color-adjust: exact !important; }
@@ -715,24 +901,10 @@ function generarPDF() {
 </head>
 <body>
 ${cvHTML}
-<script>
-    window.onload = function() {
-        document.title = "${cvData.nombre.replace(/[<>"'&]/g, '')}";
-        setTimeout(() => { window.print(); setTimeout(() => window.close(), 1000); }, 500);
-    };
-</script>
 </body>
 </html>`;
-
-        // Usar data URL para evitar mostrar la URL del servidor
-        const dataUrl = 'data:text/html;charset=utf-8,' + encodeURIComponent(contenidoLimpio);
-        
-        // Crear ventana con data URL
-        const ventanaPDF = window.open(dataUrl, '_blank', 'width=800,height=600');
-        
-        if (!ventanaPDF) {
-            // Fallback: crear archivo descargable
-            const blob = new Blob([contenidoLimpio], { type: 'text/html;charset=utf-8' });
+            
+            const blob = new Blob([contenidoHTML], { type: 'text/html;charset=utf-8' });
             const url = URL.createObjectURL(blob);
             const enlace = document.createElement('a');
             enlace.href = url;
@@ -742,7 +914,7 @@ ${cvHTML}
             document.body.removeChild(enlace);
             URL.revokeObjectURL(url);
             
-            mostrarAlerta('CV descargado como archivo HTML. Ábrelo y usa Ctrl+P para imprimir a PDF.', 'info');
+            mostrarAlerta('CV descargado como archivo HTML. Ábrelo en tu navegador y usa Ctrl+P para generar PDF.', 'info');
         }
         
         // Restaurar botón después de un momento
@@ -752,7 +924,7 @@ ${cvHTML}
             pdfBtn.disabled = false;
         }, 2000);
         
-        mostrarAlerta('¡PDF Formato Harvard generado! 📄 Compatible con filtros ATS', 'success');
+        mostrarAlerta('¡PDF listo para generar! 📄 Usa Ctrl+P en la ventana que se abrió', 'success');
         
     } catch (error) {
         console.error('Error al generar PDF:', error);
