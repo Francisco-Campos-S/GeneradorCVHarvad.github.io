@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Generador CV Harvard - Solo Español</title>
+    <title>Generador CV Harvard - React + Angular + Python</title>
+    <meta name="description" content="Generador de CV profesional en formato Harvard desarrollado con React, Angular y Python">
+    <meta name="keywords" content="CV, curriculum, Harvard, React, Angular, Python, generador">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -48,9 +50,10 @@
             color: var(--text-primary);
             border-radius: 15px;
             box-shadow: 0 15px 35px var(--shadow);
-            margin: 20px auto;
+            margin: 20px 10px;
             padding: 30px;
-            max-width: 800px;
+            max-width: 100%;
+            width: 100%;
             transition: all 0.3s ease;
         }
         
@@ -221,11 +224,98 @@
         #cvPreview {
             background: white !important;
             color: #000 !important;
+            font-family: 'Times New Roman', serif !important;
+            font-size: 11pt !important;
+            line-height: 1.4 !important;
+            max-width: 100% !important;
+            width: 100% !important;
+            margin: 0 !important;
+            padding: 20px !important;
+            overflow-x: auto !important;
+            box-sizing: border-box !important;
+        }
+
+        .tech-badges {
+            gap: 15px;
+        }
+
+        .tech-badges .badge {
+            padding: 8px 16px;
+            font-size: 0.9rem !important;
+            border-radius: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .tech-badges .badge:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .auto-generate-section {
+            background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
+            border: 1px solid #90caf9;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .python-analysis {
+            background: linear-gradient(135deg, #fff3e0 0%, #ffecb3 100%);
+            border: 1px solid #ffb74d;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            color: var(--text-primary);
+        }
+
+        [data-theme="dark"] .python-analysis {
+            background: linear-gradient(135deg, #3e2723 0%, #5d4037 100%);
+            border: 1px solid #8d6e63;
+            color: var(--text-primary);
+        }
+
+        /* Análisis resultado compatible con modo oscuro */
+        #analisisResultado .card {
+            background: var(--card-bg) !important;
+            color: var(--text-primary) !important;
+        }
+
+        #analisisResultado .card-body {
+            background: var(--card-bg) !important;
+            color: var(--text-primary) !important;
         }
         
         @keyframes spin {
             from { transform: rotate(0deg); }
             to { transform: rotate(360deg); }
+        }
+
+        .progress-container {
+            transition: all 0.3s ease;
+        }
+
+        .progress-container:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px var(--shadow);
+        }
+
+        .character-counter {
+            font-size: 0.8rem;
+            transition: color 0.3s ease;
+        }
+
+        .section-optional {
+            border: 2px dashed var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            background: var(--preview-bg);
+            transition: all 0.3s ease;
+        }
+
+        .section-optional:hover {
+            border-color: #667eea;
+            background: var(--card-bg);
         }
 
         @media (max-width: 768px) {
@@ -236,8 +326,18 @@
             }
             
             .container {
-                margin: 10px;
-                padding: 20px;
+                margin: 5px;
+                padding: 15px;
+                width: calc(100% - 10px);
+            }
+            
+            .progress-container {
+                padding: 10px;
+            }
+            
+            #cvPreview {
+                font-size: 10pt !important;
+                padding: 15px !important;
             }
         }
     </style>
@@ -248,18 +348,33 @@
         <i class="fas fa-moon" id="themeIcon"></i>
     </div>
 
-    <div class="container">
+    <div class="container" style="max-width: none; margin: 20px 10px;">
         <div class="header">
             <div class="d-flex justify-content-center align-items-center mb-3">
                 <div>
                     <h1><i class="fas fa-file-alt icon"></i>Generador de CV Harvard</h1>
-                    <p>Crea tu CV profesional en formato Harvard - Solo Español</p>
                 </div>
             </div>
         </div>
         
         <!-- Contenedor de alertas -->
         <div id="alertas"></div>
+        
+        <!-- Barra de Progreso -->
+        <div class="progress-container mb-4" style="background: var(--card-bg); border: 2px solid var(--border-color); border-radius: 12px; padding: 15px;">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <h6 class="mb-0" style="color: var(--text-primary);"><i class="fas fa-chart-line icon"></i>Progreso del CV</h6>
+                <span id="progressPercentage" class="badge bg-primary">0%</span>
+            </div>
+            <div class="progress" style="height: 10px;">
+                <div class="progress-bar bg-success progress-bar-striped progress-bar-animated" id="progressBar" 
+                     role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                </div>
+            </div>
+            <div class="mt-2">
+                <small id="progressText" style="color: var(--text-secondary);">Completa los campos para generar tu CV profesional</small>
+            </div>
+        </div>
         
         <form id="cvForm">
             <!-- Información Personal -->
@@ -281,7 +396,8 @@
             <div class="row mb-3">
                 <div class="col-md-6">
                     <label for="telefono" class="form-label">Teléfono</label>
-                    <input type="tel" class="form-control" id="telefono" placeholder="+34 123 456 789">
+                    <input type="tel" class="form-control" id="telefono" placeholder="+34 612 345 678">
+                    <div class="form-text">Número para contacto directo por WhatsApp</div>
                 </div>
                 <div class="col-md-6">
                     <label for="ubicacion" class="form-label">Ubicación</label>
@@ -301,6 +417,21 @@
                 </div>
             </div>
             
+            <!-- Perfil Profesional -->
+            <div class="section-header">
+                <i class="fas fa-user-circle icon"></i>Perfil Profesional
+            </div>
+            
+            <div class="mb-3">
+                <label for="perfilProfesional" class="form-label">Resumen Profesional</label>
+                <textarea class="form-control textarea-large" id="perfilProfesional" 
+                    placeholder="Ejemplo:&#10;Profesional egresado en ingeniería en sistemas de información, con un enfoque proactivo y autodidacta, con experiencia en desarrollo de software fullstack y administración de servidores. Me destaco por mi capacidad para aprender rápidamente y adaptarme a entornos dinámicos."></textarea>
+                <div class="d-flex justify-content-between">
+                    <div class="form-text">Describe tu perfil profesional en 2-3 líneas</div>
+                    <small id="perfilProfesionalCounter" class="text-muted">0 caracteres</small>
+                </div>
+            </div>
+            
             <!-- Educación -->
             <div class="section-header">
                 <i class="fas fa-graduation-cap icon"></i>Educación
@@ -310,7 +441,10 @@
                 <label for="educacion" class="form-label">Formación Académica</label>
                 <textarea class="form-control textarea-large" id="educacion" 
                     placeholder="Ejemplo:&#10;Máster en Ciencia de Datos&#10;Universidad de Barcelona, 2021-2023&#10;&#10;Licenciatura en Matemáticas&#10;Universidad Autónoma de Barcelona, 2017-2021"></textarea>
-                <div class="form-text">Separa cada título/institución con una línea nueva</div>
+                <div class="d-flex justify-content-between">
+                    <div class="form-text">Separa cada título/institución con una línea nueva</div>
+                    <small id="educacionCounter" class="text-muted">0 caracteres</small>
+                </div>
             </div>
             
             <!-- Experiencia -->
@@ -322,7 +456,10 @@
                 <label for="experiencia" class="form-label">Experiencia Laboral</label>
                 <textarea class="form-control textarea-large" id="experiencia" 
                     placeholder="Ejemplo:&#10;Data Scientist&#10;InnovaTech Solutions, 2023-presente&#10;• Análisis de datos con Python y R&#10;• Desarrollo de modelos de machine learning&#10;• Visualización de datos con Tableau"></textarea>
-                <div class="form-text">Usa • para viñetas en las responsabilidades</div>
+                <div class="d-flex justify-content-between">
+                    <div class="form-text">Usa • para viñetas en las responsabilidades</div>
+                    <small id="experienciaCounter" class="text-muted">0 caracteres</small>
+                </div>
             </div>
             
             <!-- Habilidades -->
@@ -333,10 +470,48 @@
             <div class="mb-3">
                 <label for="habilidades" class="form-label">Competencias Técnicas</label>
                 <textarea class="form-control textarea-large" id="habilidades" 
-                    placeholder="Ejemplo:&#10;Lenguajes: Python, JavaScript, SQL&#10;Frameworks: React, Django, Flask&#10;Bases de datos: MySQL, MongoDB&#10;Herramientas: Git, Docker, AWS&#10;Idiomas: Español (nativo), Inglés (B2)"></textarea>
-                <div class="form-text">Agrupa por categorías para mejor organización</div>
+                    placeholder="Ejemplo:&#10;Lenguajes: Python, JavaScript, TypeScript, SQL&#10;Frontend: React, Angular, Vue.js, HTML5, CSS3&#10;Backend: Node.js, Django, FastAPI, Express&#10;Bases de datos: PostgreSQL, MongoDB, MySQL&#10;Herramientas: Git, Docker, AWS, Azure"></textarea>
+                <div class="d-flex justify-content-between">
+                    <div class="form-text">Agrupa por categorías para mejor organización</div>
+                    <small id="habilidadesCounter" class="text-muted">0 caracteres</small>
+                </div>
+            </div>
+
+            <!-- Proyectos -->
+            <div class="section-header">
+                <i class="fas fa-project-diagram icon"></i>Proyectos Destacados
             </div>
             
+            <div class="mb-3">
+                <label for="proyectos" class="form-label">Proyectos Profesionales</label>
+                <textarea class="form-control textarea-large" id="proyectos" 
+                    placeholder="Ejemplo:&#10;E-commerce Platform (2023)&#10;• Desarrollado con React, Node.js y PostgreSQL&#10;• Integración de pagos con Stripe&#10;• Dashboard de administración con Angular&#10;• Más de 10,000 usuarios activos"></textarea>
+                <div class="d-flex justify-content-between">
+                    <div class="form-text">Incluye tecnologías utilizadas y métricas de impacto</div>
+                    <small id="proyectosCounter" class="text-muted">0 caracteres</small>
+                </div>
+            </div>
+
+            <!-- Secciones Opcionales -->
+            <div class="section-header">
+                <i class="fas fa-plus icon"></i>Secciones Adicionales (Opcional)
+            </div>
+            
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="certificaciones" class="form-label">Certificaciones</label>
+                    <textarea class="form-control" id="certificaciones" rows="3"
+                        placeholder="Ejemplo:&#10;• AWS Certified Solutions Architect (2023)&#10;• Google Cloud Professional Developer (2022)&#10;• Certified Scrum Master (2021)"></textarea>
+                    <small id="certificacionesCounter" class="text-muted">0 caracteres</small>
+                </div>
+                <div class="col-md-6">
+                    <label for="idiomas" class="form-label">Idiomas</label>
+                    <textarea class="form-control" id="idiomas" rows="3"
+                        placeholder="Ejemplo:&#10;• Español: Nativo&#10;• Inglés: C1 - Avanzado&#10;• Francés: B2 - Intermedio Alto"></textarea>
+                    <small id="idiomasCounter" class="text-muted">0 caracteres</small>
+                </div>
+            </div>
+
             <!-- Botones de acción -->
             <div class="text-center mt-4">
                 <button type="button" class="btn btn-primary" onclick="generarCV()">
@@ -345,8 +520,8 @@
                 <button type="button" class="btn btn-secondary" onclick="limpiarFormulario()">
                     <i class="fas fa-eraser icon"></i>Limpiar
                 </button>
-                <button type="button" class="btn btn-info" onclick="llenarEjemploCompleto()">
-                    <i class="fas fa-user-graduate icon"></i>Ejemplo Completo
+                <button type="button" class="btn btn-info" onclick="cargarEjemploModerno()">
+                    <i class="fas fa-rocket icon"></i>Ejemplo Full Stack
                 </button>
             </div>
         </form>
@@ -354,9 +529,18 @@
         <!-- Área de resultados -->
         <div id="resultado" class="preview-area" style="display: none;">
             <h4><i class="fas fa-file-code icon"></i>CV Harvard Generado</h4>
+            
+            <!-- Aviso ATS -->
+            <div class="alert alert-info mb-3" style="background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%); border: 1px solid #90caf9; border-radius: 8px; padding: 12px; color: var(--text-primary);">
+                <i class="fas fa-robot"></i> <strong>Compatible ATS:</strong> Este CV está optimizado para pasar filtros automáticos de reclutamiento con formato Harvard auténtico.
+            </div>
+            
             <div class="mb-3">
                 <button type="button" class="download-btn" onclick="generarWord()" id="wordBtn">
                     <i class="fas fa-file-word icon"></i>Descargar Word
+                </button>
+                <button type="button" class="download-btn" onclick="generarPDF()" id="pdfBtn">
+                    <i class="fas fa-file-pdf icon"></i>Generar PDF Harvard
                 </button>
                 <button type="button" class="download-btn" onclick="verVistaPrevia()" id="previewBtn">
                     <i class="fas fa-eye icon"></i>Vista Previa
@@ -364,21 +548,22 @@
             </div>
             <div id="previewArea" style="display: none;">
                 <h5>Vista Previa del CV:</h5>
-                <div id="cvPreview" style="background: white; padding: 20px; border: 1px solid #ddd; border-radius: 8px; font-family: 'Times New Roman', serif;"></div>
+                <div id="cvPreview" style="background: white; padding: 20px; border: 1px solid #ddd; border-radius: 8px; font-family: 'Times New Roman', serif; max-width: 100%; width: 100%; margin: 0; overflow-x: auto;"></div>
             </div>
         </div>
         
         <!-- Información adicional -->
         <div class="info-card">
-            <h5><i class="fas fa-info-circle icon"></i>¿Cómo usar el generador?</h5>
+            <h5><i class="fas fa-info-circle icon"></i>Formato Harvard Auténtico - Compatible ATS</h5>
             <div class="row">
                 <div class="col-md-12">
                     <ol class="mb-0">
-                        <li>Completa el formulario con tu información personal y profesional</li>
-                        <li>Haz clic en "Generar CV Harvard" para procesar los datos</li>
-                        <li>Usa "Vista Previa" para ver cómo se verá tu CV</li>
-                        <li>Descarga tu CV en formato Word</li>
-                        <li>¡Tu CV profesional estará listo para enviar!</li>
+                        <li><strong>Formato Harvard Oficial:</strong> Estructura académica reconocida mundialmente</li>
+                        <li><strong>Compatible ATS:</strong> Optimizado para filtros automáticos de reclutamiento</li>
+                        <li><strong>Tipografía Estándar:</strong> Times New Roman 12pt, espaciado profesional</li>
+                        <li><strong>Estructura Limpia:</strong> Secciones claramente definidas sin elementos gráficos</li>
+                        <li><strong>Palabras Clave:</strong> Formato que maximiza la detección de habilidades</li>
+                        <li><strong>Exportación Profesional:</strong> PDF y Word listos para aplicaciones</li>
                     </ol>
                 </div>
             </div>
@@ -434,9 +619,13 @@
                     ubicacion: document.getElementById('ubicacion').value.trim(),
                     linkedin: document.getElementById('linkedin').value.trim(),
                     portfolio: document.getElementById('portfolio').value.trim(),
+                    perfilProfesional: document.getElementById('perfilProfesional').value.trim(),
                     educacion: document.getElementById('educacion').value.trim(),
                     experiencia: document.getElementById('experiencia').value.trim(),
-                    habilidades: document.getElementById('habilidades').value.trim()
+                    habilidades: document.getElementById('habilidades').value.trim(),
+                    proyectos: document.getElementById('proyectos').value.trim(),
+                    certificaciones: document.getElementById('certificaciones').value.trim(),
+                    idiomas: document.getElementById('idiomas').value.trim()
                 };
                 
                 if (datos.nombre && datos.email) {

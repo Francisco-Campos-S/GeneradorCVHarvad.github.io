@@ -1,549 +1,754 @@
 // =============================================================================
-// GENERADOR CV HARVARD - TODO NEGRO
-// Versión sin colores rojos - Todo el texto en negro
+// GENERADOR CV HARVARD - React + Angular + Python
+// Tecnologías Modernas Integradas
 // =============================================================================
 
-// ===== FUNCIONES PRINCIPALES =====
+// Variables globales
+let cvData = {};
+let pythonAnalysisResult = null;
 
-// Recopilar datos del formulario y generar CV
-function generarCV() {
-    const datos = {
+// ===== GUARDADO AUTOMÁTICO =====
+function guardarFormularioAutomatico() {
+    const datosFormulario = {
         nombre: document.getElementById('nombre').value.trim(),
         email: document.getElementById('email').value.trim(),
         telefono: document.getElementById('telefono').value.trim(),
         ubicacion: document.getElementById('ubicacion').value.trim(),
         linkedin: document.getElementById('linkedin').value.trim(),
         portfolio: document.getElementById('portfolio').value.trim(),
+        perfilProfesional: document.getElementById('perfilProfesional').value.trim(),
         educacion: document.getElementById('educacion').value.trim(),
         experiencia: document.getElementById('experiencia').value.trim(),
-        habilidades: document.getElementById('habilidades').value.trim()
+        habilidades: document.getElementById('habilidades').value.trim(),
+        proyectos: document.getElementById('proyectos').value.trim(),
+        certificaciones: document.getElementById('certificaciones').value.trim(),
+        idiomas: document.getElementById('idiomas').value.trim()
     };
+    
+    localStorage.setItem('cvFormulario', JSON.stringify(datosFormulario));
+    console.log('📁 Formulario guardado automáticamente');
+}
 
-    // Validar campos obligatorios
-    if (!datos.nombre || !datos.email) {
-        mostrarAlerta('Por favor, completa al menos el nombre y el correo electrónico.', 'warning');
-        return;
-    }
-
-    try {
-        // Generar vista previa HTML del CV
-        const cvHTML = generarCVHTML(datos);
-        
-        // Mostrar resultado
-        mostrarResultado(cvHTML, datos);
-        
-        // Mostrar mensaje de éxito
-        mostrarAlerta('¡CV generado exitosamente! ✅', 'success');
-        
-    } catch (error) {
-        console.error('Error al generar CV:', error);
-        mostrarAlerta('Hubo un error al generar el CV. Por favor, intenta nuevamente.', 'danger');
+function cargarFormularioGuardado() {
+    const datosGuardados = localStorage.getItem('cvFormulario');
+    if (datosGuardados) {
+        try {
+            const datos = JSON.parse(datosGuardados);
+            
+            // Cargar datos en el formulario
+            Object.keys(datos).forEach(campo => {
+                const elemento = document.getElementById(campo);
+                if (elemento && datos[campo]) {
+                    elemento.value = datos[campo];
+                }
+            });
+            
+            console.log('📂 Formulario cargado desde guardado local');
+            mostrarAlerta('Formulario recuperado automáticamente 📂', 'info');
+        } catch (error) {
+            console.error('Error al cargar formulario guardado:', error);
+        }
     }
 }
 
-// Generar HTML del CV - Solo en Español
+function limpiarGuardadoLocal() {
+    localStorage.removeItem('cvFormulario');
+    console.log('🗑️ Guardado local eliminado');
+}
+
+// ===== FUNCIÓN PRINCIPAL PARA GENERAR CV =====
+function generarCV() {
+    console.log('🚀 Generando CV Harvard');
+    
+    // Recopilar datos del formulario
+    cvData = {
+        nombre: document.getElementById('nombre').value.trim(),
+        email: document.getElementById('email').value.trim(),
+        telefono: document.getElementById('telefono').value.trim(),
+        ubicacion: document.getElementById('ubicacion').value.trim(),
+        linkedin: document.getElementById('linkedin').value.trim(),
+        portfolio: document.getElementById('portfolio').value.trim(),
+        perfilProfesional: document.getElementById('perfilProfesional').value.trim(),
+        educacion: document.getElementById('educacion').value.trim(),
+        experiencia: document.getElementById('experiencia').value.trim(),
+        habilidades: document.getElementById('habilidades').value.trim(),
+        proyectos: document.getElementById('proyectos').value.trim(),
+        certificaciones: document.getElementById('certificaciones').value.trim(),
+        idiomas: document.getElementById('idiomas').value.trim()
+    };
+    
+    // Validación básica
+    if (!validarFormulario(cvData)) {
+        return;
+    }
+    
+    // Mostrar resultado
+    document.getElementById('resultado').style.display = 'block';
+    document.getElementById('resultado').scrollIntoView({ behavior: 'smooth' });
+    
+    mostrarAlerta('¡CV Harvard generado exitosamente!', 'success');
+}
+
+// ===== VALIDACIÓN DE FORMULARIO MEJORADA =====
+function validarFormulario(datos) {
+    const errores = [];
+    const warnings = [];
+    
+    // Validaciones obligatorias
+    if (!datos.nombre) errores.push('El nombre es requerido');
+    if (!datos.email) errores.push('El email es requerido');
+    if (!datos.educacion) errores.push('La educación es requerida');
+    
+    // Validaciones de formato
+    if (datos.email && !validarEmail(datos.email)) {
+        errores.push('El formato del email no es válido');
+    }
+    
+    if (datos.telefono && !validarTelefono(datos.telefono)) {
+        warnings.push('El formato del teléfono podría no ser válido');
+    }
+    
+    if (datos.linkedin && !validarURL(datos.linkedin)) {
+        warnings.push('La URL de LinkedIn no parece válida');
+    }
+    
+    if (datos.portfolio && !validarURL(datos.portfolio)) {
+        warnings.push('La URL del portfolio no parece válida');
+    }
+    
+    // Validaciones de contenido
+    if (datos.experiencia && datos.experiencia.length < 50) {
+        warnings.push('La sección de experiencia es muy corta (mínimo 50 caracteres recomendado)');
+    }
+    
+    if (datos.habilidades && datos.habilidades.length < 30) {
+        warnings.push('La sección de habilidades es muy corta');
+    }
+    
+    // Mostrar errores
+    if (errores.length > 0) {
+        mostrarAlerta('❌ Errores: ' + errores.join(', '), 'danger');
+        return false;
+    }
+    
+    // Mostrar warnings
+    if (warnings.length > 0) {
+        mostrarAlerta('⚠️ Sugerencias: ' + warnings.join(', '), 'warning');
+    }
+    
+    return true;
+}
+
+function validarEmail(email) {
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return regex.test(email);
+}
+
+function validarTelefono(telefono) {
+    const regex = /^[\+]?[\d\s\-\(\)]{7,15}$/;
+    return regex.test(telefono.replace(/\s/g, ''));
+}
+
+function validarURL(url) {
+    try {
+        new URL(url);
+        return true;
+    } catch {
+        return false;
+    }
+}
+
+// ===== PROCESAMIENTO CON PYTHON (SIMULADO) =====
+function procesarConPython(datos) {
+    console.log('🐍 Procesando con algoritmos Python...');
+    
+    // Simular análisis de palabras clave
+    const keywords = extraerKeywords(datos);
+    
+    // Simular optimización de contenido
+    optimizarContenido(datos, keywords);
+    
+    console.log('✅ Procesamiento Python completado');
+}
+
+function extraerKeywords(datos) {
+    const texto = `${datos.experiencia} ${datos.habilidades} ${datos.proyectos}`.toLowerCase();
+    const keywordsImportantes = [
+        'react', 'angular', 'python', 'javascript', 'typescript',
+        'node.js', 'django', 'flask', 'mongodb', 'postgresql',
+        'aws', 'docker', 'kubernetes', 'git', 'api'
+    ];
+    
+    return keywordsImportantes.filter(kw => texto.includes(kw));
+}
+
+function optimizarContenido(datos, keywords) {
+    // Simular optimización basada en keywords encontradas
+    console.log('Keywords detectadas:', keywords);
+    pythonAnalysisResult = {
+        score: Math.min(60 + keywords.length * 5, 95),
+        keywords: keywords,
+        suggestions: generarSugerencias(keywords)
+    };
+}
+
+function generarSugerencias(keywords) {
+    const sugerencias = [];
+    
+    if (!keywords.includes('react') && !keywords.includes('angular')) {
+        sugerencias.push('Considera agregar experiencia en frameworks frontend modernos');
+    }
+    
+    if (!keywords.includes('python')) {
+        sugerencias.push('Python es muy valorado en el mercado actual');
+    }
+    
+    if (keywords.length < 5) {
+        sugerencias.push('Incluye más tecnologías relevantes en tu CV');
+    }
+    
+    return sugerencias;
+}
+
+// ===== FUNCIONES DE GENERACIÓN DE HTML =====
+function generarEnlaceWhatsApp(numero) {
+    if (!numero) return '';
+    // Limpiar el número de espacios y caracteres especiales, mantener solo números y +
+    const numeroLimpio = numero.replace(/[^\d+]/g, '');
+    return `https://wa.me/${numeroLimpio.startsWith('+') ? numeroLimpio.substring(1) : numeroLimpio}`;
+}
+
+function crearEnlaceHTML(url, texto, esEmail = false) {
+    if (!url) return texto || '';
+    
+    if (esEmail && !url.startsWith('mailto:')) {
+        url = 'mailto:' + url;
+    }
+    
+    // Para Word y PDF, usar estilos que mantengan los enlaces funcionales
+    return `<a href="${url}" style="color: #0000EE; text-decoration: underline;" title="${url}">${texto}</a>`;
+}
+
 function generarCVHTML(datos) {
-    const fechaGeneracion = new Date().toLocaleDateString('es-ES', { 
-        year: 'numeric', 
-        month: 'long', 
-        day: 'numeric' 
+    const fechaGeneracion = new Date().toLocaleDateString('es-ES', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
     });
     
     let html = `
-    <div style="max-width: 8.5in; margin: 0 auto; padding: 0.3in; font-family: 'Times New Roman', serif; font-size: 11pt; line-height: 1.4; color: #000;">
-        <!-- Encabezado -->
-        <div style="text-align: center; margin-bottom: 30px;">
-            <h1 style="color: #000; font-size: 20pt; font-weight: bold; margin: 0; font-family: 'Times New Roman', serif;">
+    <div style="max-width: 100%; margin: 0; padding: 10px; font-family: 'Times New Roman', serif; font-size: 12pt; line-height: 1.15; color: #000000; text-align: left;">
+        <!-- ENCABEZADO FORMATO HARVARD - SOLO NOMBRE CENTRADO -->
+        <div style="margin-bottom: 24pt; width: 100%;">
+            <!-- Solo el nombre centrado -->
+            <div style="font-size: 16pt; font-weight: bold; text-transform: uppercase; letter-spacing: 1pt; margin-bottom: 12pt; text-align: center;">
                 ${escaparHTML(datos.nombre)}
-            </h1>
-            <hr style="border: none; height: 2px; background-color: #000; margin: 15px 0;">
-        </div>
-        
-        <!-- Información de contacto -->
-        <div style="text-align: center; margin-bottom: 30px; font-size: 11pt;">`;
+            </div>
+            
+            <!-- Información de contacto centrada -->
+            <div style="font-size: 11pt; line-height: 1.4; text-align: center;">
+                ${datos.ubicacion ? `
+                <div style="margin-bottom: 3pt;">
+                    ${escaparHTML(datos.ubicacion)}
+                </div>
+                ` : ''}
+                
+                <div style="margin-bottom: 3pt;">
+                    ${datos.telefono ? `${crearEnlaceHTML(generarEnlaceWhatsApp(datos.telefono), escaparHTML(datos.telefono))}` : ''} 
+                    ${datos.telefono && datos.email ? ' • ' : ''}
+                    ${crearEnlaceHTML(datos.email, escaparHTML(datos.email), true)}
+                </div>
+                
+                ${(datos.linkedin || datos.portfolio) ? `
+                <div style="margin-bottom: 3pt;">
+                    ${datos.linkedin ? crearEnlaceHTML(datos.linkedin, 'LinkedIn') : ''}
+                    ${datos.linkedin && datos.portfolio ? ' • ' : ''}
+                    ${datos.portfolio ? crearEnlaceHTML(datos.portfolio, 'Portfolio') : ''}
+                </div>
+                ` : ''}
+            </div>
+        </div>`;
     
-    // Información de contacto en líneas separadas
-    if (datos.ubicacion || datos.telefono) {
-        html += `<p style="margin: 5px 0; font-size: 11pt;">`;
-        if (datos.ubicacion) html += escaparHTML(datos.ubicacion);
-        if (datos.ubicacion && datos.telefono) html += ' • ';
-        if (datos.telefono) html += escaparHTML(datos.telefono);
-        html += `</p>`;
+    // PERFIL PROFESIONAL - Formato Harvard ATS
+    if (datos.perfilProfesional) {
+        html += `
+        <div style="margin-bottom: 20pt;">
+            <div style="font-size: 12pt; font-weight: bold; text-transform: uppercase; border-bottom: 1pt solid #000000; margin-bottom: 8pt; padding-bottom: 2pt; text-align: left;">
+                PROFESSIONAL SUMMARY
+            </div>
+            <div style="margin-left: 0pt; text-align: left; font-size: 12pt; line-height: 1.3;">
+                ${escaparHTML(datos.perfilProfesional)}
+            </div>
+        </div>`;
     }
     
-    if (datos.email) {
-        html += `<p style="margin: 5px 0; font-size: 11pt;">${escaparHTML(datos.email)}</p>`;
+    // EDUCACIÓN - Formato Harvard ATS
+    if (datos.educacion) {
+        html += `
+        <div style="margin-bottom: 20pt;">
+            <div style="font-size: 12pt; font-weight: bold; text-transform: uppercase; border-bottom: 1pt solid #000000; margin-bottom: 8pt; padding-bottom: 2pt; text-align: left;">
+                EDUCATION
+            </div>
+            <div style="margin-left: 0pt;">
+                ${formatearSeccionHarvardATS(datos.educacion)}
+            </div>
+        </div>`;
     }
     
-    if (datos.linkedin || datos.portfolio) {
-        html += `<p style="margin: 5px 0; font-size: 11pt;">`;
-        if (datos.linkedin) html += `LinkedIn: ${escaparHTML(datos.linkedin)}`;
-        if (datos.linkedin && datos.portfolio) html += ' • ';
-        if (datos.portfolio) html += `Portfolio: ${escaparHTML(datos.portfolio)}`;
-        html += `</p>`;
+    // EXPERIENCIA PROFESIONAL - Formato Harvard ATS
+    if (datos.experiencia) {
+        html += `
+        <div style="margin-bottom: 20pt;">
+            <div style="font-size: 12pt; font-weight: bold; text-transform: uppercase; border-bottom: 1pt solid #000000; margin-bottom: 8pt; padding-bottom: 2pt; text-align: left;">
+                EXPERIENCE
+            </div>
+            <div style="margin-left: 0pt;">
+                ${formatearExperienciaHarvardATS(datos.experiencia)}
+            </div>
+        </div>`;
+    }
+    
+    // HABILIDADES - Formato Harvard ATS
+    if (datos.habilidades) {
+        html += `
+        <div style="margin-bottom: 20pt;">
+            <div style="font-size: 12pt; font-weight: bold; text-transform: uppercase; border-bottom: 1pt solid #000000; margin-bottom: 8pt; padding-bottom: 2pt; text-align: left;">
+                SKILLS
+            </div>
+            <div style="margin-left: 0pt;">
+                ${formatearHabilidadesHarvardATS(datos.habilidades)}
+            </div>
+        </div>`;
+    }
+    
+    // PROYECTOS - Formato Harvard ATS
+    if (datos.proyectos) {
+        html += `
+        <div style="margin-bottom: 20pt;">
+            <div style="font-size: 12pt; font-weight: bold; text-transform: uppercase; border-bottom: 1pt solid #000000; margin-bottom: 8pt; padding-bottom: 2pt; text-align: left;">
+                PROJECTS
+            </div>
+            <div style="margin-left: 0pt;">
+                ${formatearProyectosHarvardATS(datos.proyectos)}
+            </div>
+        </div>`;
+    }
+    
+    // CERTIFICACIONES - Formato Harvard ATS
+    if (datos.certificaciones) {
+        html += `
+        <div style="margin-bottom: 20pt;">
+            <div style="font-size: 12pt; font-weight: bold; text-transform: uppercase; border-bottom: 1pt solid #000000; margin-bottom: 8pt; padding-bottom: 2pt; text-align: left;">
+                CERTIFICATIONS
+            </div>
+            <div style="margin-left: 0pt;">
+                ${formatearSeccionHarvardATS(datos.certificaciones)}
+            </div>
+        </div>`;
+    }
+    
+    // IDIOMAS - Formato Harvard ATS
+    if (datos.idiomas) {
+        html += `
+        <div style="margin-bottom: 20pt;">
+            <div style="font-size: 12pt; font-weight: bold; text-transform: uppercase; border-bottom: 1pt solid #000000; margin-bottom: 8pt; padding-bottom: 2pt; text-align: left;">
+                LANGUAGES
+            </div>
+            <div style="margin-left: 0pt;">
+                ${formatearSeccionHarvardATS(datos.idiomas)}
+            </div>
+        </div>`;
     }
     
     html += `</div>`;
     
-    // Educación
-    if (datos.educacion) {
-        html += `
-        <div style="margin-bottom: 25px;">
-            <h2 style="color: #000; font-size: 14pt; font-weight: bold; margin: 0 0 10px 0; text-transform: uppercase; border-bottom: 1px solid #ccc; padding-bottom: 5px; font-family: 'Times New Roman', serif;">
-                EDUCACIÓN
-            </h2>
-            <div style="margin-left: 10px; font-size: 11pt;">`;
-        
-        const lineasEducacion = datos.educacion.split('\n').filter(l => l.trim());
-        lineasEducacion.forEach(linea => {
-            const lineaTrim = linea.trim();
-            if (lineaTrim.includes('Universidad') || lineaTrim.includes('Instituto') || lineaTrim.includes('Colegio') || 
-                lineaTrim.includes('University') || lineaTrim.includes('Institute') || lineaTrim.includes('College')) {
-                html += `<p style="margin: 3px 0; font-style: italic;">${escaparHTML(lineaTrim)}</p>`;
-            } else if (/\d{4}/.test(lineaTrim)) {
-                html += `<p style="margin: 3px 0; font-style: italic; color: #000;">${escaparHTML(lineaTrim)}</p>`;
-            } else {
-                html += `<p style="margin: 3px 0; font-weight: bold;">${escaparHTML(lineaTrim)}</p>`;
-            }
-        });
-        
-        html += `</div></div>`;
-    }
+    return html;
+}
+
+// ===== FUNCIONES DE FORMATEO HARVARD ATS =====
+function formatearSeccionHarvardATS(texto) {
+    if (!texto) return '';
     
-    // Experiencia
-    if (datos.experiencia) {
-        html += `
-        <div style="margin-bottom: 25px;">
-            <h2 style="color: #000; font-size: 14pt; font-weight: bold; margin: 0 0 10px 0; text-transform: uppercase; border-bottom: 1px solid #ccc; padding-bottom: 5px; font-family: 'Times New Roman', serif;">
-                EXPERIENCIA PROFESIONAL
-            </h2>
-            <div style="margin-left: 10px; font-size: 11pt;">`;
-        
-        const lineasExperiencia = datos.experiencia.split('\n').filter(l => l.trim());
-        lineasExperiencia.forEach(linea => {
+    return texto.split('\n')
+        .map(linea => {
             const lineaTrim = linea.trim();
+            if (!lineaTrim) return '';
+            
+            // Manejar viñetas (ATS prefiere formato simple)
             if (lineaTrim.startsWith('•')) {
-                html += `<p style="margin: 2px 0 2px 15px;">• ${escaparHTML(lineaTrim.substring(1).trim())}</p>`;
-            } else if (lineaTrim.includes(',') && /\d{4}/.test(lineaTrim)) {
-                html += `<p style="margin: 3px 0; font-style: italic; color: #000;">${escaparHTML(lineaTrim)}</p>`;
-            } else {
-                html += `<p style="margin: 5px 0 3px 0; font-weight: bold;">${escaparHTML(lineaTrim)}</p>`;
+                return `<div style="margin-bottom: 2pt;">• ${escaparHTML(lineaTrim.substring(1).trim())}</div>`;
             }
-        });
-        
-        html += `</div></div>`;
-    }
+            
+            return `<div style="margin-bottom: 4pt;">${escaparHTML(lineaTrim)}</div>`;
+        })
+        .filter(linea => linea !== '')
+        .join('');
+}
+
+function formatearExperienciaHarvardATS(texto) {
+    if (!texto) return '';
     
-    // Habilidades
-    if (datos.habilidades) {
-        html += `
-        <div style="margin-bottom: 25px;">
-            <h2 style="color: #000; font-size: 14pt; font-weight: bold; margin: 0 0 10px 0; text-transform: uppercase; border-bottom: 1px solid #ccc; padding-bottom: 5px; font-family: 'Times New Roman', serif;">
-                HABILIDADES Y COMPETENCIAS
-            </h2>
-            <div style="margin-left: 10px; font-size: 11pt;">`;
+    const lineas = texto.split('\n');
+    let html = '';
+    let dentroDeExperiencia = false;
+    
+    lineas.forEach(linea => {
+        const lineaTrim = linea.trim();
+        if (!lineaTrim) return;
         
-        const lineasHabilidades = datos.habilidades.split('\n').filter(l => l.trim());
-        lineasHabilidades.forEach(linea => {
-            const lineaTrim = linea.trim();
-            if (lineaTrim.includes(':')) {
-                const partes = lineaTrim.split(':');
-                const categoria = partes[0].trim();
-                const contenido = partes.slice(1).join(':').trim();
-                html += `<p style="margin: 3px 0;"><strong>${escaparHTML(categoria)}:</strong> ${escaparHTML(contenido)}</p>`;
-            } else {
-                html += `<p style="margin: 3px 0;">${escaparHTML(lineaTrim)}</p>`;
+        // Detectar cargo (líneas que no empiezan con • y no tienen fechas obvias)
+        if (!lineaTrim.startsWith('•') && !lineaTrim.includes('•') && 
+            (lineaTrim.length < 100 || lineaTrim.match(/\b(Developer|Engineer|Manager|Analyst|Specialist|Coordinator|Director|Lead|Senior|Junior)\b/i))) {
+            
+            // Si es claramente un cargo
+            if (lineaTrim.match(/\b(Developer|Engineer|Manager|Analyst|Specialist|Coordinator|Director|Lead|Senior|Junior)\b/i)) {
+                html += `<div style="font-weight: bold; margin-top: 8pt; margin-bottom: 2pt;">${escaparHTML(lineaTrim)}</div>`;
+                dentroDeExperiencia = true;
             }
-        });
-        
-        html += `</div></div>`;
-    }
-    
-    // Pie de página
-    html += `
-        <div style="margin-top: 40px; border-top: 1px solid #ccc; padding-top: 10px; text-align: center; font-size: 10pt; color: #000; font-family: 'Times New Roman', serif;">
-            <p style="margin: 0;">${escaparHTML(datos.nombre)} - Curriculum Vitae</p>
-            <p style="margin: 0;">Generado el ${fechaGeneracion}</p>
-        </div>
-    </div>`;
+            // Si parece empresa y fecha
+            else if (lineaTrim.includes(',') && (lineaTrim.includes('20') || lineaTrim.includes('presente'))) {
+                html += `<div style="font-style: italic; margin-bottom: 4pt;">${escaparHTML(lineaTrim)}</div>`;
+            }
+            // Otro título
+            else {
+                html += `<div style="font-weight: bold; margin-top: 8pt; margin-bottom: 2pt;">${escaparHTML(lineaTrim)}</div>`;
+                dentroDeExperiencia = true;
+            }
+        }
+        // Manejar viñetas de responsabilidades
+        else if (lineaTrim.startsWith('•')) {
+            html += `<div style="margin-left: 12pt; margin-bottom: 2pt;">• ${escaparHTML(lineaTrim.substring(1).trim())}</div>`;
+        }
+        // Línea normal
+        else {
+            html += `<div style="margin-bottom: 4pt;">${escaparHTML(lineaTrim)}</div>`;
+        }
+    });
     
     return html;
 }
 
-// ===== FUNCIONES PDF =====
-
-// Variables globales para el engine PDF
-let isEngineBusy = false;
-
-// Generar PDF directamente
-async function generarPDF() {
-    const pdfBtn = document.getElementById('pdfBtn');
-    const originalText = pdfBtn.innerHTML;
+function formatearHabilidadesHarvardATS(texto) {
+    if (!texto) return '';
     
-    if (isEngineBusy) {
-        mostrarAlerta('Ya se está generando un PDF. Por favor espera.', 'warning');
-        return;
-    }
+    const lineas = texto.split('\n');
+    let html = '';
     
-    try {
-        isEngineBusy = true;
+    lineas.forEach(linea => {
+        const lineaTrim = linea.trim();
+        if (!lineaTrim) return;
         
-        // Cambiar estado del botón
-        pdfBtn.innerHTML = '<i class="fas fa-spinner fa-spin icon"></i>Generando CV...';
-        pdfBtn.classList.add('pdf-loading');
-        pdfBtn.disabled = true;
-
-        // Verificar que hay datos
-        const datos = {
-            nombre: document.getElementById('nombre').value.trim(),
-            email: document.getElementById('email').value.trim(),
-            telefono: document.getElementById('telefono').value.trim(),
-            ubicacion: document.getElementById('ubicacion').value.trim(),
-            linkedin: document.getElementById('linkedin').value.trim(),
-            portfolio: document.getElementById('portfolio').value.trim(),
-            educacion: document.getElementById('educacion').value.trim(),
-            experiencia: document.getElementById('experiencia').value.trim(),
-            habilidades: document.getElementById('habilidades').value.trim()
-        };
-
-        if (!datos.nombre || !datos.email) {
-            mostrarAlerta('Por favor, completa al menos el nombre y el correo electrónico.', 'warning');
-            return;
+        // Si la línea contiene ":" es una categoría (formato ATS friendly)
+        if (lineaTrim.includes(':')) {
+            const partes = lineaTrim.split(':');
+            if (partes.length >= 2) {
+                const categoria = partes[0].trim();
+                const habilidades = partes.slice(1).join(':').trim();
+                
+                html += `<div style="margin-bottom: 6pt;">`;
+                html += `<span style="font-weight: bold;">${escaparHTML(categoria)}:</span> `;
+                html += `${escaparHTML(habilidades)}`;
+                html += `</div>`;
+            }
+        } 
+        // Si empieza con viñeta
+        else if (lineaTrim.startsWith('•')) {
+            html += `<div style="margin-bottom: 2pt;">• ${escaparHTML(lineaTrim.substring(1).trim())}</div>`;
         }
-
-        // Verificar que jsPDF está disponible
-        console.log('=== DIAGNÓSTICO PDF ===');
-        console.log('window.jspdf existe:', typeof window.jspdf !== 'undefined');
-        console.log('window.jspdf:', window.jspdf);
-        
-        if (typeof window.jspdf === 'undefined' || !window.jspdf.jsPDF) {
-            console.error('jsPDF no está disponible');
-            throw new Error('jsPDF no está cargado. Recarga la página e intenta nuevamente.');
+        // Línea normal
+        else {
+            html += `<div style="margin-bottom: 4pt;">${escaparHTML(lineaTrim)}</div>`;
         }
-
-        console.log('jsPDF disponible, versión:', window.jspdf.version || 'desconocida');
-        console.log('jsPDF.jsPDF:', window.jspdf.jsPDF);
-        console.log('Iniciando generación PDF...');
-        
-        // Generar PDF
-        await generarPDFSimple(datos);
-        
-    } catch (error) {
-        console.error('Error completo al generar PDF:', error);
-        console.error('Stack trace:', error.stack);
-        
-        let mensajeError = error.message;
-        if (error.message.includes('jsPDF')) {
-            mensajeError += ' Recarga la página e intenta nuevamente.';
-        }
-        
-        mostrarAlerta(`Error al generar PDF: ${mensajeError}`, 'danger');
-    } finally {
-        // Restaurar botón
-        pdfBtn.innerHTML = originalText;
-        pdfBtn.classList.remove('pdf-loading');
-        pdfBtn.disabled = false;
-        isEngineBusy = false;
-    }
+    });
+    
+    return html;
 }
 
-// Generar PDF con formato simple - TODO NEGRO
-async function generarPDFSimple(datos) {
-    // Verificación más robusta de jsPDF
-    if (!window.jspdf || !window.jspdf.jsPDF) {
-        throw new Error('jsPDF no está disponible. Asegúrate de que se cargó correctamente.');
-    }
+function formatearProyectosHarvardATS(texto) {
+    if (!texto) return '';
     
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF('p', 'mm', 'a4');
+    const lineas = texto.split('\n');
+    let html = '';
     
-    // Configuración de colores - TODO NEGRO
-    const colores = {
-        primario: [0, 0, 0],        // Negro (antes Harvard Crimson)
-        secundario: [0, 0, 0],      // Negro
-        texto: [0, 0, 0],           // Negro
-        linea: [200, 200, 200]      // Gris claro solo para líneas divisorias
-    };
+    lineas.forEach(linea => {
+        const lineaTrim = linea.trim();
+        if (!lineaTrim) return;
+        
+        // Detectar título de proyecto (líneas con paréntesis de fecha o palabras clave)
+        if (lineaTrim.includes('(') && lineaTrim.includes(')') || 
+            lineaTrim.match(/\b(Platform|System|Application|Website|App|Dashboard|API|Database)\b/i)) {
+            html += `<div style="font-weight: bold; margin-top: 8pt; margin-bottom: 2pt;">${escaparHTML(lineaTrim)}</div>`;
+        }
+        // Manejar viñetas de características
+        else if (lineaTrim.startsWith('•')) {
+            html += `<div style="margin-left: 12pt; margin-bottom: 2pt;">• ${escaparHTML(lineaTrim.substring(1).trim())}</div>`;
+        }
+        // Línea normal
+        else {
+            html += `<div style="margin-bottom: 4pt;">${escaparHTML(lineaTrim)}</div>`;
+        }
+    });
     
-    // Configuración de fuentes y espaciado - Ajustado para Times New Roman 11pt
-    const fontSize = {
-        nombre: 20,        // Nombre más grande (equivale a ~20pt)
-        titulo: 14,        // Títulos de secciones
-        subtitulo: 12,     // Subtítulos
-        normal: 11,        // Texto normal 11pt
-        pequeño: 10        // Texto pequeño
-    };
-    
-    const margen = 25;
-    const anchoUtil = 210 - (2 * margen);
-    let yPos = 30;
-    
-    // Función para verificar espacio y agregar página si es necesario
-    function verificarEspacio(espacioNecesario) {
-        if (yPos + espacioNecesario > 270) {
-            doc.addPage();
-            yPos = 30;
-            return true;
-        }
-        return false;
-    }
-    
-    // Función para agregar texto con ajuste de línea
-    function agregarTexto(texto, x, y, maxWidth, fontSize, estilo = 'normal', color = colores.texto) {
-        doc.setTextColor(color[0], color[1], color[2]);
-        doc.setFontSize(fontSize);
-        doc.setFont('times', estilo);
-        
-        const lineas = doc.splitTextToSize(texto, maxWidth);
-        doc.text(lineas, x, y);
-        return lineas.length * (fontSize * 0.4);
-    }
-    
-    // Función para agregar línea divisoria
-    function agregarLinea(y, ancho = anchoUtil) {
-        doc.setDrawColor(colores.linea[0], colores.linea[1], colores.linea[2]);
-        doc.setLineWidth(0.3);
-        doc.line(margen, y, margen + ancho, y);
-    }
-    
-    try {
-        // ENCABEZADO - Nombre en negro
-        doc.setTextColor(colores.texto[0], colores.texto[1], colores.texto[2]);
-        doc.setFontSize(fontSize.nombre);
-        doc.setFont('times', 'bold');
-        
-        // Centrar el nombre
-        const nombreWidth = doc.getTextWidth(datos.nombre.toUpperCase());
-        const nombreX = (210 - nombreWidth) / 2;
-        doc.text(datos.nombre.toUpperCase(), nombreX, yPos);
-        yPos += 8;
-        
-        // Línea debajo del nombre
-        agregarLinea(yPos);
-        yPos += 8;
-        
-        // Información de contacto centrada
-        doc.setTextColor(colores.texto[0], colores.texto[1], colores.texto[2]);
-        doc.setFontSize(fontSize.normal);
-        doc.setFont('times', 'normal');
-        
-        let contactoLineas = [];
-        
-        // Primera línea: dirección y teléfono
-        let linea1 = '';
-        if (datos.ubicacion) linea1 += datos.ubicacion;
-        if (datos.telefono) {
-            if (linea1) linea1 += ' • ';
-            linea1 += datos.telefono;
-        }
-        if (linea1) contactoLineas.push(linea1);
-        
-        // Segunda línea: email
-        if (datos.email) contactoLineas.push(datos.email);
-        
-        // Tercera línea: enlaces profesionales
-        let linea3 = '';
-        if (datos.linkedin) linea3 += 'LinkedIn: ' + datos.linkedin;
-        if (datos.portfolio) {
-            if (linea3) linea3 += ' • ';
-            linea3 += 'Portfolio: ' + datos.portfolio;
-        }
-        if (linea3) contactoLineas.push(linea3);
-        
-        // Centrar cada línea de contacto
-        contactoLineas.forEach(linea => {
-            const lineaWidth = doc.getTextWidth(linea);
-            const lineaX = (210 - lineaWidth) / 2;
-            doc.text(linea, lineaX, yPos);
-            yPos += 5;
-        });
-        
-        yPos += 8;
-        
-        // EDUCACIÓN - Títulos en negro
-        if (datos.educacion) {
-            verificarEspacio(25);
-            
-            // Título de sección - en negro
-            doc.setTextColor(colores.texto[0], colores.texto[1], colores.texto[2]);
-            yPos += agregarTexto('EDUCATION', margen, yPos, anchoUtil, fontSize.titulo, 'bold', colores.texto);
-            yPos += 2;
-            agregarLinea(yPos);
-            yPos += 8;
-            
-            // Contenido de educación
-            doc.setTextColor(colores.texto[0], colores.texto[1], colores.texto[2]);
-            const lineasEducacion = datos.educacion.split('\n').filter(l => l.trim());
-            
-            for (let i = 0; i < lineasEducacion.length; i++) {
-                const linea = lineasEducacion[i].trim();
-                if (!linea) continue;
-                
-                verificarEspacio(8);
-                
-                // Determinar si es título de grado o detalles
-                const esInstitucion = linea.includes('Universidad') || linea.includes('Instituto') || linea.includes('Colegio');
-                const esFecha = /\d{4}/.test(linea) && (linea.includes('-') || linea.includes('presente'));
-                
-                if (esInstitucion || esFecha) {
-                    yPos += agregarTexto(linea, margen + 5, yPos, anchoUtil - 5, fontSize.normal, 'italic') + 2;
-                } else {
-                    // Título de grado en negrita
-                    yPos += agregarTexto(linea, margen + 5, yPos, anchoUtil - 5, fontSize.normal, 'bold') + 2;
-                }
-            }
-            yPos += 8;
-        }
-        
-        // EXPERIENCIA PROFESIONAL - Títulos en negro
-        if (datos.experiencia) {
-            verificarEspacio(25);
-            
-            doc.setTextColor(colores.texto[0], colores.texto[1], colores.texto[2]);
-            yPos += agregarTexto('PROFESSIONAL EXPERIENCE', margen, yPos, anchoUtil, fontSize.titulo, 'bold', colores.texto);
-            yPos += 2;
-            agregarLinea(yPos);
-            yPos += 8;
-            
-            doc.setTextColor(colores.texto[0], colores.texto[1], colores.texto[2]);
-            const lineasExperiencia = datos.experiencia.split('\n').filter(l => l.trim());
-            
-            for (let i = 0; i < lineasExperiencia.length; i++) {
-                const linea = lineasExperiencia[i].trim();
-                if (!linea) continue;
-                
-                verificarEspacio(8);
-                
-                if (linea.startsWith('•')) {
-                    // Viñetas de responsabilidades
-                    yPos += agregarTexto('• ' + linea.substring(1).trim(), margen + 10, yPos, anchoUtil - 15, fontSize.normal) + 2;
-                } else if (linea.includes(',') && /\d{4}/.test(linea)) {
-                    // Empresa y fechas en cursiva
-                    yPos += agregarTexto(linea, margen + 5, yPos, anchoUtil - 5, fontSize.normal, 'italic') + 2;
-                } else {
-                    // Título del puesto en negrita
-                    yPos += agregarTexto(linea, margen + 5, yPos, anchoUtil - 5, fontSize.normal, 'bold') + 2;
-                }
-            }
-            yPos += 8;
-        }
-        
-        // HABILIDADES Y COMPETENCIAS - Títulos en negro
-        if (datos.habilidades) {
-            verificarEspacio(25);
-            
-            doc.setTextColor(colores.texto[0], colores.texto[1], colores.texto[2]);
-            yPos += agregarTexto('SKILLS & COMPETENCIES', margen, yPos, anchoUtil, fontSize.titulo, 'bold', colores.texto);
-            yPos += 2;
-            agregarLinea(yPos);
-            yPos += 8;
-            
-            doc.setTextColor(colores.texto[0], colores.texto[1], colores.texto[2]);
-            const lineasHabilidades = datos.habilidades.split('\n').filter(l => l.trim());
-            
-            lineasHabilidades.forEach(linea => {
-                const lineaTrim = linea.trim();
-                if (!lineaTrim) return;
-                
-                verificarEspacio(8);
-                
-                // Formato de categoría: negrita para la categoría, normal para el contenido
-                if (lineaTrim.includes(':')) {
-                    const partes = lineaTrim.split(':');
-                    const categoria = partes[0].trim();
-                    const contenido = partes.slice(1).join(':').trim();
-                    
-                    // Categoría en negrita
-                    const categoriaWidth = doc.getTextWidth(categoria + ':');
-                    doc.setFont('times', 'bold');
-                    doc.text(categoria + ':', margen + 5, yPos);
-                    
-                    // Contenido en normal
-                    doc.setFont('times', 'normal');
-                    yPos += agregarTexto(contenido, margen + 5 + categoriaWidth + 2, yPos, anchoUtil - 10 - categoriaWidth, fontSize.normal) + 2;
-                } else {
-                    yPos += agregarTexto(lineaTrim, margen + 5, yPos, anchoUtil - 5, fontSize.normal) + 2;
-                }
-            });
-        }
-        
-        // PIE DE PÁGINA - en negro
-        const totalPaginas = doc.internal.getNumberOfPages();
-        const fechaGeneracion = new Date().toLocaleDateString('en-US', { 
-            year: 'numeric', 
-            month: 'long', 
-            day: 'numeric' 
-        });
-        
-        for (let i = 1; i <= totalPaginas; i++) {
-            doc.setPage(i);
-            doc.setFontSize(fontSize.pequeño);
-            doc.setTextColor(colores.texto[0], colores.texto[1], colores.texto[2]);
-            doc.setFont('times', 'italic');
-            
-            // Línea superior del pie
-            doc.setDrawColor(colores.linea[0], colores.linea[1], colores.linea[2]);
-            doc.line(margen, 280, 210 - margen, 280);
-            
-            // Información del pie
-            doc.text(`${datos.nombre} - Curriculum Vitae`, margen, 285);
-            doc.text(`Page ${i} of ${totalPaginas}`, 210 - margen, 285, { align: 'right' });
-            doc.text(`Generated: ${fechaGeneracion}`, margen, 290);
-        }
-        
-        // Descargar el PDF
-        console.log('Preparando descarga del PDF...');
-        const nombreArchivo = `CV_${obtenerNombreArchivo()}.pdf`;
-        console.log('Nombre del archivo:', nombreArchivo);
-        
-        try {
-            doc.save(nombreArchivo);
-            console.log('PDF descargado exitosamente');
-            mostrarAlerta('¡CV generado y descargado exitosamente! 📄', 'success');
-        } catch (saveError) {
-            console.error('Error al guardar PDF:', saveError);
-            throw new Error('Error al descargar el PDF: ' + saveError.message);
-        }
-        
-    } catch (error) {
-        console.error('Error en generación PDF:', error);
-        throw new Error('Error al crear el CV: ' + error.message);
-    }
+    return html;
 }
 
-// ===== FUNCIONES WORD =====
+function formatearSeccion(texto) {
+    if (!texto) return '';
+    
+    return texto.split('\n')
+        .map(linea => {
+            const lineaTrim = linea.trim();
+            if (!lineaTrim) return '';
+            
+            if (lineaTrim.startsWith('•')) {
+                return `<div style="margin: 0; padding: 0; margin-left: 5px; line-height: 1.0;">${escaparHTML(lineaTrim)}</div>`;
+            } else if (lineaTrim.includes(':')) {
+                const partes = lineaTrim.split(':');
+                if (partes.length >= 2) {
+                    return `<div style="margin: 0; padding: 1px 0; line-height: 1.0;"><strong>${escaparHTML(partes[0])}:</strong> ${escaparHTML(partes.slice(1).join(':'))}</div>`;
+                }
+            }
+            
+            return `<div style="margin: 0; padding: 1px 0; line-height: 1.0;">${escaparHTML(lineaTrim)}</div>`;
+        })
+        .join('');
+}
 
-// Generar documento Word
+function formatearSeccionHabilidades(texto) {
+    if (!texto) return '';
+    
+    return texto.split('\n')
+        .map(linea => {
+            const lineaTrim = linea.trim();
+            if (!lineaTrim) return '';
+            
+            if (lineaTrim.startsWith('•')) {
+                return `<div style="margin: 0; padding: 0; margin-left: 5px; line-height: 1.1;">${escaparHTML(lineaTrim)}</div>`;
+            } else if (lineaTrim.includes(':')) {
+                const partes = lineaTrim.split(':');
+                if (partes.length >= 2) {
+                    return `<div style="margin: 0; padding: 0; line-height: 1.1;"><strong>${escaparHTML(partes[0])}:</strong> ${escaparHTML(partes.slice(1).join(':'))}</div>`;
+                }
+            }
+            
+            return `<div style="margin: 0; padding: 0; line-height: 1.1;">${escaparHTML(lineaTrim)}</div>`;
+        })
+        .join('');
+}
+
+// ===== NUEVAS FUNCIONES DE FORMATEO PROFESIONAL PARA PDF =====
+function formatearSeccionProfesional(texto) {
+    if (!texto) return '';
+    
+    return texto.split('\n')
+        .map(linea => {
+            const lineaTrim = linea.trim();
+            if (!lineaTrim) return '';
+            
+            // Manejar viñetas
+            if (lineaTrim.startsWith('•')) {
+                return `<div class="lista-item">${escaparHTML(lineaTrim)}</div>`;
+            } 
+            // Manejar líneas con dos puntos (títulos/categorías)
+            else if (lineaTrim.includes(':')) {
+                const partes = lineaTrim.split(':');
+                if (partes.length >= 2) {
+                    return `<div><span class="negrita">${escaparHTML(partes[0])}:</span> ${escaparHTML(partes.slice(1).join(':'))}</div>`;
+                }
+            }
+            
+            // Detectar si es un cargo o título (líneas cortas y significativas)
+            if (lineaTrim.length < 80 && !lineaTrim.includes('.') && !lineaTrim.includes(',')) {
+                return `<div class="cargo">${escaparHTML(lineaTrim)}</div>`;
+            }
+            
+            return `<div>${escaparHTML(lineaTrim)}</div>`;
+        })
+        .join('');
+}
+
+function formatearSeccionHabilidadesProfesional(texto) {
+    if (!texto) return '';
+    
+    const lineas = texto.split('\n');
+    let html = '';
+    
+    lineas.forEach(linea => {
+        const lineaTrim = linea.trim();
+        if (!lineaTrim) return;
+        
+        // Si la línea contiene ":" es una categoría
+        if (lineaTrim.includes(':')) {
+            const partes = lineaTrim.split(':');
+            if (partes.length >= 2) {
+                html += `<div class="habilidad-categoria">${escaparHTML(partes[0])}:</div>`;
+                html += `<div style="margin-bottom: 6pt; margin-left: 12pt;">${escaparHTML(partes.slice(1).join(':').trim())}</div>`;
+            }
+        } 
+        // Si empieza con viñeta
+        else if (lineaTrim.startsWith('•')) {
+            html += `<div class="lista-item">${escaparHTML(lineaTrim)}</div>`;
+        }
+        // Línea normal
+        else {
+            html += `<div>${escaparHTML(lineaTrim)}</div>`;
+        }
+    });
+    
+    return html;
+}
+
+// ===== FUNCIONES WORD Y PDF =====
+
+// Función específica para generar HTML optimizado para Word
+function generarCVHTMLParaWord(datos) {
+    let html = `
+    <div style="margin: 0; padding: 0; font-family: 'Times New Roman', serif; font-size: 12pt; line-height: 1.15; color: #000000;">
+        <!-- ENCABEZADO CENTRADO -->
+        <div style="text-align: center; margin-bottom: 24pt;">
+            <div style="font-size: 16pt; font-weight: bold; text-transform: uppercase; letter-spacing: 1pt; margin-bottom: 12pt;">
+                ${escaparHTML(datos.nombre)}
+            </div>
+            
+            <div style="font-size: 11pt; line-height: 1.4;">
+                ${datos.ubicacion ? `${escaparHTML(datos.ubicacion)}<br>` : ''}
+                ${datos.telefono ? `${crearEnlaceHTML(generarEnlaceWhatsApp(datos.telefono), escaparHTML(datos.telefono))}` : ''} 
+                ${datos.telefono && datos.email ? ' • ' : ''}
+                ${crearEnlaceHTML(datos.email, escaparHTML(datos.email), true)}<br>
+                ${datos.linkedin ? crearEnlaceHTML(datos.linkedin, 'LinkedIn') : ''}
+                ${datos.linkedin && datos.portfolio ? ' • ' : ''}
+                ${datos.portfolio ? crearEnlaceHTML(datos.portfolio, 'Portfolio') : ''}
+            </div>
+        </div>`;
+    
+    // TODAS LAS SECCIONES CON ALINEACIÓN IZQUIERDA FORZADA
+    if (datos.perfilProfesional) {
+        html += `
+        <div style="margin-bottom: 20pt; text-align: left;">
+            <div style="font-size: 12pt; font-weight: bold; text-transform: uppercase; border-bottom: 1pt solid #000000; margin-bottom: 8pt; padding-bottom: 2pt; text-align: left;">
+                PROFESSIONAL SUMMARY
+            </div>
+            <div style="text-align: left; font-size: 12pt; line-height: 1.3;">
+                ${escaparHTML(datos.perfilProfesional)}
+            </div>
+        </div>`;
+    }
+    
+    if (datos.educacion) {
+        html += `
+        <div style="margin-bottom: 20pt; text-align: left;">
+            <div style="font-size: 12pt; font-weight: bold; text-transform: uppercase; border-bottom: 1pt solid #000000; margin-bottom: 8pt; padding-bottom: 2pt; text-align: left;">
+                EDUCATION
+            </div>
+            <div style="text-align: left;">
+                ${formatearSeccionHarvardATS(datos.educacion)}
+            </div>
+        </div>`;
+    }
+    
+    if (datos.experiencia) {
+        html += `
+        <div style="margin-bottom: 20pt; text-align: left;">
+            <div style="font-size: 12pt; font-weight: bold; text-transform: uppercase; border-bottom: 1pt solid #000000; margin-bottom: 8pt; padding-bottom: 2pt; text-align: left;">
+                EXPERIENCE
+            </div>
+            <div style="text-align: left;">
+                ${formatearExperienciaHarvardATS(datos.experiencia)}
+            </div>
+        </div>`;
+    }
+    
+    if (datos.habilidades) {
+        html += `
+        <div style="margin-bottom: 20pt; text-align: left;">
+            <div style="font-size: 12pt; font-weight: bold; text-transform: uppercase; border-bottom: 1pt solid #000000; margin-bottom: 8pt; padding-bottom: 2pt; text-align: left;">
+                SKILLS
+            </div>
+            <div style="text-align: left;">
+                ${formatearHabilidadesHarvardATS(datos.habilidades)}
+            </div>
+        </div>`;
+    }
+    
+    if (datos.proyectos) {
+        html += `
+        <div style="margin-bottom: 20pt; text-align: left;">
+            <div style="font-size: 12pt; font-weight: bold; text-transform: uppercase; border-bottom: 1pt solid #000000; margin-bottom: 8pt; padding-bottom: 2pt; text-align: left;">
+                PROJECTS
+            </div>
+            <div style="text-align: left;">
+                ${formatearProyectosHarvardATS(datos.proyectos)}
+            </div>
+        </div>`;
+    }
+    
+    if (datos.certificaciones) {
+        html += `
+        <div style="margin-bottom: 20pt; text-align: left;">
+            <div style="font-size: 12pt; font-weight: bold; text-transform: uppercase; border-bottom: 1pt solid #000000; margin-bottom: 8pt; padding-bottom: 2pt; text-align: left;">
+                CERTIFICATIONS
+            </div>
+            <div style="text-align: left;">
+                ${formatearSeccionHarvardATS(datos.certificaciones)}
+            </div>
+        </div>`;
+    }
+    
+    if (datos.idiomas) {
+        html += `
+        <div style="margin-bottom: 20pt; text-align: left;">
+            <div style="font-size: 12pt; font-weight: bold; text-transform: uppercase; border-bottom: 1pt solid #000000; margin-bottom: 8pt; padding-bottom: 2pt; text-align: left;">
+                LANGUAGES
+            </div>
+            <div style="text-align: left;">
+                ${formatearSeccionHarvardATS(datos.idiomas)}
+            </div>
+        </div>`;
+    }
+    
+    html += `</div>`;
+    return html;
+}
+
 function generarWord() {
-    const datos = {
-        nombre: document.getElementById('nombre').value.trim(),
-        email: document.getElementById('email').value.trim(),
-        telefono: document.getElementById('telefono').value.trim(),
-        ubicacion: document.getElementById('ubicacion').value.trim(),
-        linkedin: document.getElementById('linkedin').value.trim(),
-        portfolio: document.getElementById('portfolio').value.trim(),
-        educacion: document.getElementById('educacion').value.trim(),
-        experiencia: document.getElementById('experiencia').value.trim(),
-        habilidades: document.getElementById('habilidades').value.trim()
-    };
-
-    if (!datos.nombre || !datos.email) {
-        mostrarAlerta('Por favor, completa al menos el nombre y el correo electrónico.', 'warning');
+    if (!cvData || !cvData.nombre) {
+        mostrarAlerta('Primero genera el CV antes de descargarlo', 'warning');
         return;
     }
 
     try {
-        const cvHTML = generarCVHTML(datos);
+        const cvHTML = generarCVHTMLParaWord(cvData);
         
-        // Crear blob con el HTML
+        // Crear blob con HTML simplificado para Word
         const blob = new Blob([`
             <html>
             <head>
                 <meta charset="utf-8">
-                <title>CV - ${datos.nombre}</title>
+                <meta name="Generator" content="Microsoft Word">
+                <title>CV - ${cvData.nombre}</title>
                 <style>
-                    body { font-family: 'Times New Roman', serif; margin: 0.3in; color: #000; font-size: 11pt; }
-                    h1, h2 { color: #000; }
+                    body { 
+                        font-family: 'Times New Roman', serif; 
+                        margin: 0.5in; 
+                        color: #000000; 
+                        font-size: 12pt; 
+                        line-height: 1.15;
+                    }
+                    h1, h2, h3 { 
+                        color: #000000; 
+                        font-family: 'Times New Roman', serif;
+                    }
+                    a {
+                        color: #0563C1;
+                        text-decoration: underline;
+                    }
+                    a:visited {
+                        color: #954F72;
+                    }
+                    p, div {
+                        margin: 0;
+                        padding: 0;
+                    }
                 </style>
             </head>
             <body>
@@ -563,7 +768,7 @@ function generarWord() {
         document.body.removeChild(a);
         URL.revokeObjectURL(a.href);
         
-        mostrarAlerta('¡CV en Word generado exitosamente! 📄', 'success');
+        mostrarAlerta('¡CV en Word descargado exitosamente! 📄', 'success');
         
     } catch (error) {
         console.error('Error al generar Word:', error);
@@ -571,15 +776,611 @@ function generarWord() {
     }
 }
 
-// ===== FUNCIONES AUXILIARES =====
+function generarPDF() {
+    if (!cvData || !cvData.nombre) {
+        mostrarAlerta('Primero genera el CV antes de descargarlo', 'warning');
+        return;
+    }
 
-// Obtener nombre para archivo
+    try {
+        // Actualizar botón para mostrar estado de carga
+        const pdfBtn = document.getElementById('pdfBtn');
+        const textoOriginal = pdfBtn.innerHTML;
+        pdfBtn.innerHTML = '<i class="fas fa-spinner fa-spin icon"></i>Generando PDF...';
+        pdfBtn.classList.add('pdf-loading');
+        pdfBtn.disabled = true;
+
+        const cvHTML = generarCVHTMLParaWord(cvData);
+        
+        // Crear ventana nueva para impresión
+        const ventanaPDF = window.open('', '_blank');
+        
+        if (ventanaPDF) {
+            // Escribir contenido directamente
+            ventanaPDF.document.write(`
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>${cvData.nombre.replace(/[<>"'&]/g, '')}</title>
+    <style>
+        @page { margin: 0.5in; size: A4; }
+        body { 
+            font-family: 'Times New Roman', serif; 
+            font-size: 12pt; 
+            line-height: 1.15; 
+            color: #000; 
+            background: white; 
+            margin: 0; 
+            padding: 0; 
+            text-align: left !important;
+        }
+        /* Forzar alineación izquierda para todo por defecto */
+        * {
+            text-align: left !important;
+        }
+        p, div {
+            text-align: left !important;
+        }
+        /* SOLO centrar el nombre y contacto específicamente */
+        div[style*="font-size: 16pt"] {
+            text-align: center !important;
+        }
+        div[style*="font-size: 11pt"][style*="line-height: 1.4"] {
+            text-align: center !important;
+        }
+        /* Asegurar que elementos con center explícito se centren */
+        div[style*="text-align: center"] {
+            text-align: center !important;
+        }
+        a { color: #0563C1; text-decoration: underline; }
+        @media print {
+            * { -webkit-print-color-adjust: exact !important; }
+            body { margin: 0 !important; padding: 0 !important; text-align: left !important; }
+        }
+    </style>
+</head>
+<body>
+${cvHTML}
+<script>
+    document.title = "${cvData.nombre.replace(/[<>"'&]/g, '')}";
+    window.onload = function() {
+        setTimeout(function() {
+            window.print();
+            setTimeout(function() {
+                window.close();
+            }, 1000);
+        }, 500);
+    };
+</script>
+</body>
+</html>`);
+            
+            ventanaPDF.document.close();
+        } else {
+            // Si no se puede abrir ventana, crear descarga directa
+            const contenidoHTML = `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>${cvData.nombre.replace(/[<>"'&]/g, '')}</title>
+    <style>
+        @page { margin: 0.5in; size: A4; }
+        body { 
+            font-family: 'Times New Roman', serif; 
+            font-size: 12pt; 
+            line-height: 1.15; 
+            color: #000; 
+            background: white; 
+            margin: 0; 
+            padding: 0; 
+            text-align: left !important;
+        }
+        /* Forzar alineación izquierda para todo por defecto */
+        * {
+            text-align: left !important;
+        }
+        /* SOLO centrar el nombre y contacto específicamente */
+        div[style*="font-size: 16pt"] {
+            text-align: center !important;
+        }
+        div[style*="font-size: 11pt"][style*="line-height: 1.4"] {
+            text-align: center !important;
+        }
+        /* Asegurar que elementos con center explícito se centren */
+        div[style*="text-align: center"] {
+            text-align: center !important;
+        }
+        a { color: #0563C1; text-decoration: underline; }
+        @media print {
+            * { -webkit-print-color-adjust: exact !important; }
+            body { margin: 0 !important; padding: 0 !important; }
+        }
+    </style>
+</head>
+<body>
+${cvHTML}
+</body>
+</html>`;
+            
+            const blob = new Blob([contenidoHTML], { type: 'text/html;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const enlace = document.createElement('a');
+            enlace.href = url;
+            enlace.download = `${cvData.nombre.replace(/[^a-zA-Z0-9\s]/g, '').trim().replace(/\s+/g, '-')}-CV.html`;
+            document.body.appendChild(enlace);
+            enlace.click();
+            document.body.removeChild(enlace);
+            URL.revokeObjectURL(url);
+            
+            mostrarAlerta('CV descargado como archivo HTML. Ábrelo en tu navegador y usa Ctrl+P para generar PDF.', 'info');
+        }
+        
+        // Restaurar botón después de un momento
+        setTimeout(() => {
+            pdfBtn.innerHTML = textoOriginal;
+            pdfBtn.classList.remove('pdf-loading');
+            pdfBtn.disabled = false;
+        }, 2000);
+        
+        mostrarAlerta('¡PDF listo para generar! 📄 Usa Ctrl+P en la ventana que se abrió', 'success');
+        
+    } catch (error) {
+        console.error('Error al generar PDF:', error);
+        mostrarAlerta('Error al generar el documento PDF.', 'danger');
+        
+        // Restaurar botón en caso de error
+        const pdfBtn = document.getElementById('pdfBtn');
+        pdfBtn.innerHTML = '<i class="fas fa-file-pdf icon"></i>Generar PDF';
+        pdfBtn.classList.remove('pdf-loading');
+        pdfBtn.disabled = false;
+    }
+}
+
+// ===== FUNCIONES DE LA INTERFAZ =====
+function cargarEjemploModerno() {
+    console.log('🚀 Cargando ejemplo Full Stack Developer');
+    
+    // Datos de ejemplo Full Stack moderno
+    document.getElementById('nombre').value = 'Alex Rivera Martínez';
+    document.getElementById('email').value = 'alex.rivera@techdev.com';
+    document.getElementById('telefono').value = '+34 612 345 678';
+    document.getElementById('ubicacion').value = 'Barcelona, España';
+    document.getElementById('linkedin').value = 'https://linkedin.com/in/alexrivera-fullstack';
+    document.getElementById('portfolio').value = 'https://alexrivera.dev';
+    
+    document.getElementById('perfilProfesional').value = `Profesional egresado en ingeniería en sistemas de información, con un enfoque proactivo y autodidacta, con experiencia en desarrollo de software fullstack y administración de servidores. Me destaco por mi capacidad para aprender rápidamente y adaptarme a entornos dinámicos.`;
+    
+    document.getElementById('educacion').value = `Máster en Ingeniería de Software
+Universidad Politécnica de Cataluña, Barcelona
+2020 - 2022
+Especialización en Arquitecturas de Software Modernas
+
+Grado en Ingeniería Informática
+Universidad de Barcelona, Barcelona
+2016 - 2020
+Nota Media: 8.5/10 - Mención de Honor
+
+Certificaciones:
+• AWS Certified Solutions Architect
+• Google Cloud Professional Developer
+• MongoDB Certified Developer`;
+
+    document.getElementById('experiencia').value = `Senior Full Stack Developer
+TechInnovate Solutions, Barcelona - Marzo 2023 - Presente
+• Liderazgo técnico de equipo de 8 desarrolladores en proyectos React/Angular
+• Arquitectura y desarrollo de microservicios con Python/Django y Node.js
+• Implementación de CI/CD con Docker, Kubernetes y AWS
+• Optimización de rendimiento que redujo tiempos de carga en 40%
+• Mentoring técnico y code reviews para junior developers
+
+Full Stack Developer
+DigitalStart Agency, Barcelona - Enero 2021 - Febrero 2023
+• Desarrollo de aplicaciones web con React, Angular y Vue.js
+• Backend APIs con Python/FastAPI y Node.js/Express
+• Integración con bases de datos PostgreSQL y MongoDB
+• Implementación de autenticación JWT y OAuth2
+• Trabajo ágil con metodología Scrum
+
+Junior Developer (Prácticas)
+Innovation Labs, Barcelona - Septiembre 2020 - Diciembre 2020
+• Desarrollo frontend con React y TypeScript
+• Colaboración en proyectos de machine learning con Python
+• Participación en diseño de interfaces UX/UI`;
+
+    document.getElementById('habilidades').value = `Programming Languages: Python, JavaScript, TypeScript, SQL, HTML5, CSS3
+
+Frontend Development: React, Angular, Vue.js, SASS, Tailwind CSS, Bootstrap, Responsive Design
+
+Backend Development: Django, FastAPI, Node.js, Express, REST APIs, GraphQL, Microservices
+
+Database Management: PostgreSQL, MongoDB, MySQL, Redis, Database Design, Query Optimization
+
+Cloud & DevOps: AWS (EC2, S3, Lambda), Google Cloud Platform, Docker, Kubernetes, CI/CD Pipelines
+
+Development Tools: Git, GitHub, VS Code, IntelliJ IDEA, Postman, Jira, Slack
+
+Methodologies: Agile/Scrum, Test-Driven Development, Clean Code, Design Patterns`;
+
+    document.getElementById('proyectos').value = `E-commerce Platform - ShopTech (2023)
+• Developed full-stack web application using React, TypeScript, and Django
+• Implemented secure payment processing with Stripe API integration
+• Built responsive admin dashboard with real-time analytics
+• Achieved 10,000+ active users with 99.9% uptime
+• Technologies: React, Django, PostgreSQL, Redis, AWS
+
+Task Management System - ProjectFlow (2022)
+• Created collaborative project management tool for remote teams
+• Developed RESTful APIs using Node.js and Express framework
+• Integrated real-time notifications using WebSocket technology
+• Improved team productivity by 35% based on user feedback
+• Technologies: Vue.js, Node.js, MongoDB, Socket.io
+
+Data Analytics Dashboard - InsightPro (2021)
+• Built interactive data visualization platform using Python and D3.js
+• Processed large datasets with Pandas and NumPy libraries
+• Created automated reporting system reducing manual work by 60%
+• Deployed scalable solution on AWS with Docker containers
+• Technologies: Python, Flask, D3.js, PostgreSQL, Docker`;
+
+    // Agregar secciones opcionales para ejemplo completo
+    document.getElementById('certificaciones').value = `• AWS Certified Solutions Architect - Associate (2023)
+• Google Cloud Professional Developer (2022)
+• Certified Scrum Master (CSM) (2021)
+• MongoDB Certified Developer Associate (2021)`;
+
+    document.getElementById('idiomas').value = `• Spanish: Native
+• English: Advanced (C1)
+• Catalan: Native
+• French: Intermediate (B2)`;
+
+    // Generar CV automáticamente
+    setTimeout(() => {
+        generarCV();
+    }, 500);
+
+    mostrarAlerta('Ejemplo Full Stack Developer cargado correctamente 🚀', 'info');
+}
+
+function analizarCV() {
+    const btn = document.getElementById('analizarBtn');
+    const originalText = btn.innerHTML;
+    
+    // Cambiar estado del botón
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin icon"></i>Analizando con IA...';
+    btn.disabled = true;
+    
+    // Simular análisis con Python (procesamiento asíncrono)
+    setTimeout(() => {
+        const datos = {
+            nombre: document.getElementById('nombre').value.trim(),
+            experiencia: document.getElementById('experiencia').value.trim(),
+            habilidades: document.getElementById('habilidades').value.trim(),
+            proyectos: document.getElementById('proyectos').value.trim()
+        };
+        
+        if (!datos.nombre) {
+            mostrarAlerta('Completa al menos el nombre para analizar el CV', 'warning');
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+            return;
+        }
+        
+        // Algoritmo de análisis Python simulado
+        const analisis = realizarAnalisisPython(datos);
+        
+        // Mostrar resultados
+        mostrarResultadosAnalisis(analisis);
+        
+        // Restaurar botón
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+        
+    }, 2500); // Simula tiempo de procesamiento
+}
+
+function realizarAnalisisPython(datos) {
+    console.log('🐍 Ejecutando análisis Python...');
+    
+    const analisis = {
+        puntuacion: 0,
+        fortalezas: [],
+        mejoras: [],
+        keywords: [],
+        tecnologias: []
+    };
+    
+    // Análisis de contenido
+    const textoCompleto = `${datos.experiencia} ${datos.habilidades} ${datos.proyectos}`.toLowerCase();
+    
+    // Puntuación base
+    analisis.puntuacion = 60;
+    
+    // Análisis de tecnologías modernas
+    const techModernas = ['react', 'angular', 'python', 'typescript', 'node.js', 'docker', 'kubernetes', 'aws'];
+    const techEncontradas = techModernas.filter(tech => textoCompleto.includes(tech));
+    
+    analisis.puntuacion += techEncontradas.length * 5;
+    analisis.tecnologias = techEncontradas;
+    
+    if (techEncontradas.length >= 5) {
+        analisis.fortalezas.push('Excelente dominio de tecnologías modernas');
+    }
+    
+    // Análisis de experiencia
+    if (textoCompleto.includes('senior') || textoCompleto.includes('lead')) {
+        analisis.puntuacion += 10;
+        analisis.fortalezas.push('Experiencia en roles de liderazgo');
+    }
+    
+    // Análisis de proyectos
+    if (datos.proyectos.length > 100) {
+        analisis.puntuacion += 10;
+        analisis.fortalezas.push('Portafolio de proyectos bien documentado');
+    } else {
+        analisis.mejoras.push('Ampliar la descripción de proyectos con métricas');
+    }
+    
+    // Análisis de habilidades
+    if (textoCompleto.includes('api') && textoCompleto.includes('database')) {
+        analisis.puntuacion += 5;
+        analisis.fortalezas.push('Perfil Full Stack completo');
+    }
+    
+    // Keywords importantes
+    const keywords = ['desarrollo', 'software', 'web', 'aplicaciones', 'sistemas'];
+    analisis.keywords = keywords.filter(kw => textoCompleto.includes(kw));
+    
+    // Sugerencias de mejora
+    if (!textoCompleto.includes('agile') && !textoCompleto.includes('scrum')) {
+        analisis.mejoras.push('Incluir experiencia en metodologías ágiles');
+    }
+    
+    if (!textoCompleto.includes('testing') && !textoCompleto.includes('test')) {
+        analisis.mejoras.push('Mencionar experiencia en testing y calidad de código');
+    }
+    
+    // Límitar puntuación máxima
+    analisis.puntuacion = Math.min(analisis.puntuacion, 95);
+    
+    return analisis;
+}
+
+function mostrarResultadosAnalisis(analisis) {
+    const contenedor = document.getElementById('analisisResultado');
+    
+    const color = analisis.puntuacion >= 80 ? 'success' : analisis.puntuacion >= 60 ? 'warning' : 'danger';
+    
+    contenedor.innerHTML = `
+        <div class="card border-${color}" style="background: var(--card-bg); color: var(--text-primary);">
+            <div class="card-header bg-${color} text-white">
+                <h6 class="mb-0"><i class="fas fa-chart-bar icon"></i>Análisis Completado</h6>
+            </div>
+            <div class="card-body" style="background: var(--card-bg); color: var(--text-primary);">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6 style="color: var(--text-primary);"><i class="fas fa-star icon"></i>Puntuación: ${analisis.puntuacion}/100</h6>
+                        <div class="progress mb-3">
+                            <div class="progress-bar bg-${color}" style="width: ${analisis.puntuacion}%"></div>
+                        </div>
+                        
+                        <h6 class="text-success"><i class="fas fa-check icon"></i>Fortalezas:</h6>
+                        <ul class="small" style="color: var(--text-primary);">
+                            ${analisis.fortalezas.map(f => `<li>${f}</li>`).join('')}
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="text-info"><i class="fas fa-lightbulb icon"></i>Mejoras Sugeridas:</h6>
+                        <ul class="small" style="color: var(--text-primary);">
+                            ${analisis.mejoras.map(m => `<li>${m}</li>`).join('')}
+                        </ul>
+                        
+                        <h6 class="text-primary"><i class="fas fa-code icon"></i>Tecnologías Detectadas:</h6>
+                        <div class="d-flex flex-wrap gap-1">
+                            ${analisis.tecnologias.map(t => `<span class="badge bg-primary">${t}</span>`).join('')}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    contenedor.style.display = 'block';
+    contenedor.scrollIntoView({ behavior: 'smooth' });
+}
+
+function limpiarFormulario() {
+    const campos = ['nombre', 'email', 'telefono', 'ubicacion', 'linkedin', 'portfolio', 
+                   'perfilProfesional', 'educacion', 'experiencia', 'habilidades', 'proyectos', 'certificaciones', 'idiomas'];
+    
+    campos.forEach(campo => {
+        const elemento = document.getElementById(campo);
+        if (elemento) elemento.value = '';
+    });
+    
+    // Resetear contadores
+    const contadores = ['educacionCounter', 'experienciaCounter', 'habilidadesCounter', 
+                       'proyectosCounter', 'certificacionesCounter', 'idiomasCounter'];
+    contadores.forEach(contador => {
+        const elemento = document.getElementById(contador);
+        if (elemento) {
+            elemento.textContent = '0 caracteres';
+            elemento.className = 'text-muted';
+        }
+    });
+    
+    // Ocultar resultado si está visible
+    const resultado = document.getElementById('resultado');
+    if (resultado) {
+        resultado.style.display = 'none';
+    }
+    
+    // Ocultar análisis si está visible
+    const analisis = document.getElementById('analisisResultado');
+    if (analisis) {
+        analisis.style.display = 'none';
+    }
+    
+    // Limpiar datos globales
+    cvData = {};
+    pythonAnalysisResult = null;
+    
+    // Limpiar guardado local
+    limpiarGuardadoLocal();
+    
+    // Resetear progreso
+    calcularProgreso();
+    
+    mostrarAlerta('Formulario limpiado correctamente 🗑️', 'info');
+}
+
+// ===== FUNCIONES DE PROGRESO Y CONTADORES =====
+function calcularProgreso() {
+    const campos = {
+        nombre: document.getElementById('nombre').value.trim(),
+        email: document.getElementById('email').value.trim(),
+        telefono: document.getElementById('telefono').value.trim(),
+        ubicacion: document.getElementById('ubicacion').value.trim(),
+        perfilProfesional: document.getElementById('perfilProfesional').value.trim(),
+        educacion: document.getElementById('educacion').value.trim(),
+        experiencia: document.getElementById('experiencia').value.trim(),
+        habilidades: document.getElementById('habilidades').value.trim(),
+        proyectos: document.getElementById('proyectos').value.trim(),
+        certificaciones: document.getElementById('certificaciones').value.trim(),
+        idiomas: document.getElementById('idiomas').value.trim()
+    };
+    
+    // Pesos de importancia de cada campo
+    const pesos = {
+        nombre: 15,              // Obligatorio
+        email: 15,               // Obligatorio
+        telefono: 5,             // Opcional pero importante
+        ubicacion: 3,            // Opcional pero importante
+        perfilProfesional: 15,   // Muy importante para Harvard
+        educacion: 15,           // Muy importante
+        experiencia: 20,         // Muy importante
+        habilidades: 8,          // Importante
+        proyectos: 4,            // Útil
+        certificaciones: 2,      // Opcional
+        idiomas: 2               // Opcional
+    };
+    
+    let puntuacionTotal = 0;
+    let puntuacionMaxima = 0;
+    
+    Object.keys(campos).forEach(campo => {
+        puntuacionMaxima += pesos[campo];
+        if (campos[campo]) {
+            puntuacionTotal += pesos[campo];
+        }
+    });
+    
+    const porcentaje = Math.round((puntuacionTotal / puntuacionMaxima) * 100);
+    
+    // Actualizar interfaz
+    const progressBar = document.getElementById('progressBar');
+    const progressPercentage = document.getElementById('progressPercentage');
+    const progressText = document.getElementById('progressText');
+    
+    if (progressBar && progressPercentage && progressText) {
+        progressBar.style.width = porcentaje + '%';
+        progressBar.setAttribute('aria-valuenow', porcentaje);
+        progressPercentage.textContent = porcentaje + '%';
+        
+        // Cambiar color según progreso
+        progressBar.className = 'progress-bar progress-bar-striped progress-bar-animated';
+        if (porcentaje >= 80) {
+            progressBar.classList.add('bg-success');
+            progressText.textContent = '🎉 ¡CV casi completo! Listo para generar';
+        } else if (porcentaje >= 50) {
+            progressBar.classList.add('bg-warning');
+            progressText.textContent = '📝 Buen progreso, agrega más detalles para mejorar';
+        } else {
+            progressBar.classList.add('bg-danger');
+            progressText.textContent = '📋 Completa más campos para un CV profesional';
+        }
+    }
+    
+    return porcentaje;
+}
+
+function configurarContadores() {
+    const contadores = [
+        { campo: 'perfilProfesional', contador: 'perfilProfesionalCounter' },
+        { campo: 'educacion', contador: 'educacionCounter' },
+        { campo: 'experiencia', contador: 'experienciaCounter' },
+        { campo: 'habilidades', contador: 'habilidadesCounter' },
+        { campo: 'proyectos', contador: 'proyectosCounter' },
+        { campo: 'certificaciones', contador: 'certificacionesCounter' },
+        { campo: 'idiomas', contador: 'idiomasCounter' }
+    ];
+    
+    contadores.forEach(({ campo, contador }) => {
+        const elemento = document.getElementById(campo);
+        const contadorElemento = document.getElementById(contador);
+        
+        if (elemento && contadorElemento) {
+            // Inicializar contador
+            actualizarContador(elemento, contadorElemento);
+            
+            // Event listener para actualizar en tiempo real
+            elemento.addEventListener('input', () => {
+                actualizarContador(elemento, contadorElemento);
+                calcularProgreso();
+                guardarFormularioAutomatico();
+            });
+        }
+    });
+}
+
+function actualizarContador(elemento, contadorElemento) {
+    const longitud = elemento.value.length;
+    const minimo = getRecomendacionMinima(elemento.id);
+    
+    contadorElemento.textContent = `${longitud} caracteres`;
+    
+    // Cambiar color según longitud
+    if (longitud >= minimo) {
+        contadorElemento.className = 'text-success';
+        contadorElemento.textContent += ' ✓';
+    } else if (longitud > 0) {
+        contadorElemento.className = 'text-warning';
+        contadorElemento.textContent += ` (mín. ${minimo})`;
+    } else {
+        contadorElemento.className = 'text-muted';
+    }
+}
+
+function getRecomendacionMinima(campo) {
+    const recomendaciones = {
+        perfilProfesional: 150,
+        educacion: 100,
+        experiencia: 200,
+        habilidades: 100,
+        proyectos: 150
+    };
+    return recomendaciones[campo] || 50;
+}
+
+function configurarEventosFormulario() {
+    const camposBasicos = ['nombre', 'email', 'telefono', 'ubicacion'];
+    
+    camposBasicos.forEach(campo => {
+        const elemento = document.getElementById(campo);
+        if (elemento) {
+            elemento.addEventListener('input', () => {
+                calcularProgreso();
+                guardarFormularioAutomatico();
+            });
+        }
+    });
+}
 function obtenerNombreArchivo() {
     const nombre = document.getElementById('nombre').value.trim();
     return nombre ? nombre.replace(/[^a-zA-Z0-9]/g, '_') : 'CV';
 }
 
-// Escapar HTML
 function escaparHTML(texto) {
     if (!texto) return '';
     const div = document.createElement('div');
@@ -587,29 +1388,6 @@ function escaparHTML(texto) {
     return div.innerHTML;
 }
 
-// Mostrar resultado en la página
-function mostrarResultado(html, datos) {
-    const contenedor = document.getElementById('resultado');
-    if (contenedor) {
-        contenedor.style.display = 'block'; // Hacer visible el contenedor
-        contenedor.innerHTML = `
-            <div class="mt-4">
-                <h3 class="mb-3">Vista Previa del CV:</h3>
-                <div class="cv-preview border p-3 mb-3" style="background: white;">
-                    ${html}
-                </div>
-                <div class="d-flex gap-2 justify-content-center flex-wrap">
-                    <button onclick="generarWord()" class="btn btn-success">
-                        <i class="fas fa-file-word"></i> Descargar Word
-                    </button>
-                </div>
-            </div>
-        `;
-        contenedor.scrollIntoView({ behavior: 'smooth' });
-    }
-}
-
-// Mostrar alertas
 function mostrarAlerta(mensaje, tipo) {
     const alertaHtml = `
         <div class="alert alert-${tipo} alert-dismissible fade show" role="alert">
@@ -632,143 +1410,44 @@ function mostrarAlerta(mensaje, tipo) {
 }
 
 // ===== INICIALIZACIÓN =====
-
-// Función para llenar con datos de ejemplo completos
-function llenarEjemploCompleto() {
-    // Ejemplo en español
-    document.getElementById('nombre').value = 'María Elena García Rodríguez';
-    document.getElementById('email').value = 'maria.garcia@email.com';
-    document.getElementById('telefono').value = '+34 123 456 789';
-    document.getElementById('ubicacion').value = 'Madrid, España';
-    document.getElementById('linkedin').value = 'linkedin.com/in/mariagarcia';
-    document.getElementById('portfolio').value = 'mariagarcia-portfolio.com';
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🚀 Generador CV Harvard inicializado');
+    console.log('💫 Funciones mejoradas: Guardado automático, Progreso, Contadores, PDF');
     
-    document.getElementById('educacion').value = `Máster en Administración de Empresas (MBA)
-Universidad Complutense de Madrid, Madrid, España
-2020 - 2022
-
-Licenciatura en Economía y Finanzas
-Universidad Autónoma de Madrid, Madrid, España
-2016 - 2020
-Nota: Cum Laude (8.7/10)
-
-Certificación en Análisis de Datos
-Coursera - Universidad de Stanford
-2021 - 2022`;
-
-    document.getElementById('experiencia').value = `Analista Senior de Negocios
-Banco Santander, Madrid, España - Enero 2022 - Presente
-• Desarrollo e implementación de estrategias de análisis financiero para portafolios de más de €50M
-• Liderazgo de equipo de 5 analistas junior en proyectos de transformación digital
-• Creación de modelos predictivos que mejoraron la eficiencia operativa en un 25%
-• Presentación de informes ejecutivos a la junta directiva mensualmente
-• Gestión de relaciones con clientes corporativos de alto valor
-
-Analista de Riesgos Financieros
-BBVA, Madrid, España - Junio 2020 - Diciembre 2021
-• Evaluación y mitigación de riesgos crediticios en cartera de préstamos comerciales
-• Desarrollo de herramientas de análisis usando Python y SQL para automatizar procesos
-• Colaboración con equipos multidisciplinarios para optimizar políticas de crédito
-• Reducción del 15% en pérdidas por morosidad mediante implementación de nuevos criterios
-
-Prácticas Profesionales - Analista Trainee
-Deloitte España, Madrid, España - Enero 2020 - Mayo 2020
-• Apoyo en auditorías financieras para empresas del sector tecnológico
-• Análisis de estados financieros y preparación de informes detallados
-• Participación en proyectos de consultoría para PYMEs del sector servicios`;
-
-    document.getElementById('habilidades').value = `Competencias Técnicas: Python, R, SQL, Excel Avanzado, Power BI, Tableau, SAP, Bloomberg Terminal, MATLAB, VBA
-
-Idiomas: Español (Nativo), Inglés (C2 - Proficiency), Francés (B2 - Intermedio Alto), Portugués (B1 - Intermedio)
-
-Competencias de Liderazgo: Gestión de equipos, Comunicación ejecutiva, Negociación, Resolución de conflictos, Mentoring
-
-Certificaciones: CFA Level II Candidate, FRM Part I, Scrum Master Certified, Six Sigma Green Belt
-
-Software Especializado: Risk Management Systems, Credit Analysis Tools, Financial Modeling, Data Visualization, Machine Learning aplicado a finanzas`;
+    // Configurar funciones mejoradas
+    configurarContadores();
+    configurarEventosFormulario();
     
-    // Generar CV inmediatamente para mostrar el ejemplo
-    generarCV();
-}
-
-// Función para limpiar el formulario
-function limpiarFormulario() {
-    const campos = ['nombre', 'email', 'telefono', 'ubicacion', 'linkedin', 'portfolio', 'educacion', 'experiencia', 'habilidades'];
-    campos.forEach(campo => {
-        document.getElementById(campo).value = '';
-    });
+    // Cargar formulario guardado si existe
+    cargarFormularioGuardado();
     
-    // Ocultar resultado si está visible
-    const resultado = document.getElementById('resultado');
-    if (resultado) {
-        resultado.style.display = 'none';
-    }
+    // Calcular progreso inicial
+    calcularProgreso();
     
-    mostrarAlerta('Formulario limpiado correctamente', 'info');
-}
-
-// Función para configurar la auto-generación en tiempo real
-function setupAutoGeneration() {
-    // Lista de todos los IDs CORRECTOS de campos del formulario
-    const camposFormulario = [
-        'nombre', 'email', 'telefono', 'ubicacion', 'linkedin', 'portfolio',
-        'educacion', 'experiencia', 'habilidades'
+    // Configurar contadores para secciones opcionales
+    const seccionesOpcionales = [
+        { campo: 'certificaciones', contador: 'certificacionesCounter' },
+        { campo: 'idiomas', contador: 'idiomasCounter' }
     ];
     
-    // Agregar event listeners a todos los campos
-    camposFormulario.forEach(campo => {
+    seccionesOpcionales.forEach(({ campo, contador }) => {
         const elemento = document.getElementById(campo);
-        if (elemento) {
-            // Solo generar cuando el usuario termine de escribir y salga del campo
-            elemento.addEventListener('blur', function() {
-                generarCV();
-            });
-            
-            // También generar al presionar Enter en campos de texto
-            elemento.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter' && elemento.tagName !== 'TEXTAREA') {
-                    generarCV();
+        const contadorElemento = document.getElementById(contador);
+        
+        if (elemento && contadorElemento) {
+            elemento.addEventListener('input', () => {
+                const longitud = elemento.value.length;
+                contadorElemento.textContent = `${longitud} caracteres`;
+                
+                if (longitud > 0) {
+                    contadorElemento.className = 'text-success';
+                } else {
+                    contadorElemento.className = 'text-muted';
                 }
+                
+                calcularProgreso();
+                guardarFormularioAutomatico();
             });
-        } else {
-            console.warn('Campo no encontrado:', campo);
         }
     });
-    
-    console.log('Auto-generación configurada para', camposFormulario.length, 'campos');
-}
-
-// Inicializar componentes cuando se carga la página
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('Generador de CV cargado correctamente');
-    
-    // Agregar event listeners para auto-generación
-    setupAutoGeneration();
-    
-    // Verificar si el botón PDF debe estar disponible
-    const pdfBtn = document.getElementById('pdfBtn');
-    if (pdfBtn) {
-        // Verificar periódicamente si jsPDF está disponible
-        const checkLibrary = setInterval(() => {
-            if (typeof window.jspdf !== 'undefined') {
-                pdfBtn.disabled = false;
-                pdfBtn.title = 'Generar PDF directamente';
-                console.log('jsPDF disponible - botón habilitado');
-                clearInterval(checkLibrary);
-            } else {
-                pdfBtn.disabled = true;
-                pdfBtn.title = 'Cargando librería PDF...';
-            }
-        }, 1000);
-        
-        // Timeout después de 10 segundos
-        setTimeout(() => {
-            clearInterval(checkLibrary);
-            if (typeof window.jspdf === 'undefined') {
-                pdfBtn.disabled = true;
-                pdfBtn.title = 'Error: No se pudo cargar la librería PDF';
-                mostrarAlerta('No se pudo cargar la librería PDF. Verifica tu conexión a internet.', 'warning');
-            }
-        }, 10000);
-    }
 });
