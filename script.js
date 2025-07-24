@@ -7,6 +7,52 @@
 let cvData = {};
 let pythonAnalysisResult = null;
 
+// ===== GUARDADO AUTOMÁTICO =====
+function guardarFormularioAutomatico() {
+    const datosFormulario = {
+        nombre: document.getElementById('nombre').value.trim(),
+        email: document.getElementById('email').value.trim(),
+        telefono: document.getElementById('telefono').value.trim(),
+        ubicacion: document.getElementById('ubicacion').value.trim(),
+        linkedin: document.getElementById('linkedin').value.trim(),
+        portfolio: document.getElementById('portfolio').value.trim(),
+        educacion: document.getElementById('educacion').value.trim(),
+        experiencia: document.getElementById('experiencia').value.trim(),
+        habilidades: document.getElementById('habilidades').value.trim(),
+        proyectos: document.getElementById('proyectos').value.trim()
+    };
+    
+    localStorage.setItem('cvFormulario', JSON.stringify(datosFormulario));
+    console.log('📁 Formulario guardado automáticamente');
+}
+
+function cargarFormularioGuardado() {
+    const datosGuardados = localStorage.getItem('cvFormulario');
+    if (datosGuardados) {
+        try {
+            const datos = JSON.parse(datosGuardados);
+            
+            // Cargar datos en el formulario
+            Object.keys(datos).forEach(campo => {
+                const elemento = document.getElementById(campo);
+                if (elemento && datos[campo]) {
+                    elemento.value = datos[campo];
+                }
+            });
+            
+            console.log('📂 Formulario cargado desde guardado local');
+            mostrarAlerta('Formulario recuperado automáticamente 📂', 'info');
+        } catch (error) {
+            console.error('Error al cargar formulario guardado:', error);
+        }
+    }
+}
+
+function limpiarGuardadoLocal() {
+    localStorage.removeItem('cvFormulario');
+    console.log('🗑️ Guardado local eliminado');
+}
+
 // ===== FUNCIÓN PRINCIPAL PARA GENERAR CV =====
 function generarCV() {
     console.log('🚀 Generando CV Harvard');
@@ -22,7 +68,9 @@ function generarCV() {
         educacion: document.getElementById('educacion').value.trim(),
         experiencia: document.getElementById('experiencia').value.trim(),
         habilidades: document.getElementById('habilidades').value.trim(),
-        proyectos: document.getElementById('proyectos').value.trim()
+        proyectos: document.getElementById('proyectos').value.trim(),
+        certificaciones: document.getElementById('certificaciones').value.trim(),
+        idiomas: document.getElementById('idiomas').value.trim()
     };
     
     // Validación básica
@@ -37,19 +85,73 @@ function generarCV() {
     mostrarAlerta('¡CV Harvard generado exitosamente!', 'success');
 }
 
-// ===== VALIDACIÓN DE FORMULARIO =====
+// ===== VALIDACIÓN DE FORMULARIO MEJORADA =====
 function validarFormulario(datos) {
     const errores = [];
+    const warnings = [];
     
+    // Validaciones obligatorias
     if (!datos.nombre) errores.push('El nombre es requerido');
     if (!datos.email) errores.push('El email es requerido');
+    if (!datos.educacion) errores.push('La educación es requerida');
     
+    // Validaciones de formato
+    if (datos.email && !validarEmail(datos.email)) {
+        errores.push('El formato del email no es válido');
+    }
+    
+    if (datos.telefono && !validarTelefono(datos.telefono)) {
+        warnings.push('El formato del teléfono podría no ser válido');
+    }
+    
+    if (datos.linkedin && !validarURL(datos.linkedin)) {
+        warnings.push('La URL de LinkedIn no parece válida');
+    }
+    
+    if (datos.portfolio && !validarURL(datos.portfolio)) {
+        warnings.push('La URL del portfolio no parece válida');
+    }
+    
+    // Validaciones de contenido
+    if (datos.experiencia && datos.experiencia.length < 50) {
+        warnings.push('La sección de experiencia es muy corta (mínimo 50 caracteres recomendado)');
+    }
+    
+    if (datos.habilidades && datos.habilidades.length < 30) {
+        warnings.push('La sección de habilidades es muy corta');
+    }
+    
+    // Mostrar errores
     if (errores.length > 0) {
-        mostrarAlerta('Errores de validación: ' + errores.join(', '), 'danger');
+        mostrarAlerta('❌ Errores: ' + errores.join(', '), 'danger');
         return false;
     }
     
+    // Mostrar warnings
+    if (warnings.length > 0) {
+        mostrarAlerta('⚠️ Sugerencias: ' + warnings.join(', '), 'warning');
+    }
+    
     return true;
+}
+
+function validarEmail(email) {
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return regex.test(email);
+}
+
+function validarTelefono(telefono) {
+    const regex = /^[\+]?[\d\s\-\(\)]{7,15}$/;
+    return regex.test(telefono.replace(/\s/g, ''));
+}
+
+function validarURL(url) {
+    try {
+        new URL(url);
+        return true;
+    } catch {
+        return false;
+    }
 }
 
 // ===== PROCESAMIENTO CON PYTHON (SIMULADO) =====
@@ -185,6 +287,32 @@ function generarCVHTML(datos) {
         </div>`;
     }
     
+    // CERTIFICACIONES (NUEVA SECCIÓN)
+    if (datos.certificaciones) {
+        html += `
+        <div style="margin-bottom: 20px;">
+            <h2 style="font-size: 14pt; color: #000; margin: 0 0 6px 0; font-weight: bold; text-transform: uppercase; border-bottom: 1px solid #000;">
+                CERTIFICATIONS
+            </h2>
+            <div style="margin-left: 0px;">
+                ${formatearSeccion(datos.certificaciones)}
+            </div>
+        </div>`;
+    }
+    
+    // IDIOMAS (NUEVA SECCIÓN)
+    if (datos.idiomas) {
+        html += `
+        <div style="margin-bottom: 20px;">
+            <h2 style="font-size: 14pt; color: #000; margin: 0 0 6px 0; font-weight: bold; text-transform: uppercase; border-bottom: 1px solid #000;">
+                LANGUAGES
+            </h2>
+            <div style="margin-left: 0px;">
+                ${formatearSeccion(datos.idiomas)}
+            </div>
+        </div>`;
+    }
+    
     // PIE DE PÁGINA
     html += `
         <div style="margin-top: 40px; border-top: 1px solid #ccc; padding-top: 10px; text-align: center; font-size: 10pt; color: #666;">
@@ -240,7 +368,7 @@ function formatearSeccionHabilidades(texto) {
         .join('');
 }
 
-// ===== FUNCIONES WORD =====
+// ===== FUNCIONES WORD Y PDF =====
 function generarWord() {
     if (!cvData || !cvData.nombre) {
         mostrarAlerta('Primero genera el CV antes de descargarlo', 'warning');
@@ -290,6 +418,66 @@ function generarWord() {
     } catch (error) {
         console.error('Error al generar Word:', error);
         mostrarAlerta('Error al generar el documento Word.', 'danger');
+    }
+}
+
+function generarPDF() {
+    if (!cvData || !cvData.nombre) {
+        mostrarAlerta('Primero genera el CV antes de descargarlo', 'warning');
+        return;
+    }
+
+    try {
+        const cvHTML = generarCVHTML(cvData);
+        
+        // Crear ventana de impresión optimizada para PDF
+        const ventanaImpresion = window.open('', '_blank');
+        ventanaImpresion.document.write(`
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset="utf-8">
+                <title>CV - ${cvData.nombre}</title>
+                <style>
+                    @page {
+                        margin: 0.4in;
+                        size: A4;
+                    }
+                    body { 
+                        font-family: 'Times New Roman', serif; 
+                        margin: 0;
+                        color: #000; 
+                        font-size: 11pt; 
+                        line-height: 1.15;
+                        background: white;
+                    }
+                    h1, h2 { color: #000; }
+                    @media print {
+                        body { margin: 0; }
+                        .no-print { display: none; }
+                    }
+                </style>
+            </head>
+            <body>
+                ${cvHTML}
+                <script>
+                    window.onload = function() {
+                        setTimeout(function() {
+                            window.print();
+                            window.close();
+                        }, 500);
+                    }
+                </script>
+            </body>
+            </html>
+        `);
+        
+        ventanaImpresion.document.close();
+        mostrarAlerta('¡Ventana de impresión abierta! Selecciona "Guardar como PDF" 📄', 'info');
+        
+    } catch (error) {
+        console.error('Error al generar PDF:', error);
+        mostrarAlerta('Error al generar el documento PDF.', 'danger');
     }
 }
 
@@ -530,10 +718,23 @@ function mostrarResultadosAnalisis(analisis) {
 }
 
 function limpiarFormulario() {
-    const campos = ['nombre', 'email', 'telefono', 'ubicacion', 'linkedin', 'portfolio', 'educacion', 'experiencia', 'habilidades', 'proyectos'];
+    const campos = ['nombre', 'email', 'telefono', 'ubicacion', 'linkedin', 'portfolio', 
+                   'educacion', 'experiencia', 'habilidades', 'proyectos', 'certificaciones', 'idiomas'];
+    
     campos.forEach(campo => {
         const elemento = document.getElementById(campo);
         if (elemento) elemento.value = '';
+    });
+    
+    // Resetear contadores
+    const contadores = ['educacionCounter', 'experienciaCounter', 'habilidadesCounter', 
+                       'proyectosCounter', 'certificacionesCounter', 'idiomasCounter'];
+    contadores.forEach(contador => {
+        const elemento = document.getElementById(contador);
+        if (elemento) {
+            elemento.textContent = '0 caracteres';
+            elemento.className = 'text-muted';
+        }
     });
     
     // Ocultar resultado si está visible
@@ -552,10 +753,146 @@ function limpiarFormulario() {
     cvData = {};
     pythonAnalysisResult = null;
     
-    mostrarAlerta('Formulario limpiado correctamente', 'info');
+    // Limpiar guardado local
+    limpiarGuardadoLocal();
+    
+    // Resetear progreso
+    calcularProgreso();
+    
+    mostrarAlerta('Formulario limpiado correctamente 🗑️', 'info');
 }
 
-// ===== FUNCIONES AUXILIARES =====
+// ===== FUNCIONES DE PROGRESO Y CONTADORES =====
+function calcularProgreso() {
+    const campos = {
+        nombre: document.getElementById('nombre').value.trim(),
+        email: document.getElementById('email').value.trim(),
+        telefono: document.getElementById('telefono').value.trim(),
+        ubicacion: document.getElementById('ubicacion').value.trim(),
+        educacion: document.getElementById('educacion').value.trim(),
+        experiencia: document.getElementById('experiencia').value.trim(),
+        habilidades: document.getElementById('habilidades').value.trim(),
+        proyectos: document.getElementById('proyectos').value.trim()
+    };
+    
+    // Pesos de importancia de cada campo
+    const pesos = {
+        nombre: 20,      // Obligatorio
+        email: 20,       // Obligatorio
+        telefono: 5,     // Opcional pero importante
+        ubicacion: 5,    // Opcional pero importante
+        educacion: 15,   // Muy importante
+        experiencia: 20, // Muy importante
+        habilidades: 10, // Importante
+        proyectos: 5     // Útil
+    };
+    
+    let puntuacionTotal = 0;
+    let puntuacionMaxima = 0;
+    
+    Object.keys(campos).forEach(campo => {
+        puntuacionMaxima += pesos[campo];
+        if (campos[campo]) {
+            puntuacionTotal += pesos[campo];
+        }
+    });
+    
+    const porcentaje = Math.round((puntuacionTotal / puntuacionMaxima) * 100);
+    
+    // Actualizar interfaz
+    const progressBar = document.getElementById('progressBar');
+    const progressPercentage = document.getElementById('progressPercentage');
+    const progressText = document.getElementById('progressText');
+    
+    if (progressBar && progressPercentage && progressText) {
+        progressBar.style.width = porcentaje + '%';
+        progressBar.setAttribute('aria-valuenow', porcentaje);
+        progressPercentage.textContent = porcentaje + '%';
+        
+        // Cambiar color según progreso
+        progressBar.className = 'progress-bar progress-bar-striped progress-bar-animated';
+        if (porcentaje >= 80) {
+            progressBar.classList.add('bg-success');
+            progressText.textContent = '🎉 ¡CV casi completo! Listo para generar';
+        } else if (porcentaje >= 50) {
+            progressBar.classList.add('bg-warning');
+            progressText.textContent = '📝 Buen progreso, agrega más detalles para mejorar';
+        } else {
+            progressBar.classList.add('bg-danger');
+            progressText.textContent = '📋 Completa más campos para un CV profesional';
+        }
+    }
+    
+    return porcentaje;
+}
+
+function configurarContadores() {
+    const contadores = [
+        { campo: 'educacion', contador: 'educacionCounter' },
+        { campo: 'experiencia', contador: 'experienciaCounter' },
+        { campo: 'habilidades', contador: 'habilidadesCounter' },
+        { campo: 'proyectos', contador: 'proyectosCounter' }
+    ];
+    
+    contadores.forEach(({ campo, contador }) => {
+        const elemento = document.getElementById(campo);
+        const contadorElemento = document.getElementById(contador);
+        
+        if (elemento && contadorElemento) {
+            // Inicializar contador
+            actualizarContador(elemento, contadorElemento);
+            
+            // Event listener para actualizar en tiempo real
+            elemento.addEventListener('input', () => {
+                actualizarContador(elemento, contadorElemento);
+                calcularProgreso();
+                guardarFormularioAutomatico();
+            });
+        }
+    });
+}
+
+function actualizarContador(elemento, contadorElemento) {
+    const longitud = elemento.value.length;
+    const minimo = getRecomendacionMinima(elemento.id);
+    
+    contadorElemento.textContent = `${longitud} caracteres`;
+    
+    // Cambiar color según longitud
+    if (longitud >= minimo) {
+        contadorElemento.className = 'text-success';
+        contadorElemento.textContent += ' ✓';
+    } else if (longitud > 0) {
+        contadorElemento.className = 'text-warning';
+        contadorElemento.textContent += ` (mín. ${minimo})`;
+    } else {
+        contadorElemento.className = 'text-muted';
+    }
+}
+
+function getRecomendacionMinima(campo) {
+    const recomendaciones = {
+        educacion: 100,
+        experiencia: 200,
+        habilidades: 100,
+        proyectos: 150
+    };
+    return recomendaciones[campo] || 50;
+}
+
+function configurarEventosFormulario() {
+    const camposBasicos = ['nombre', 'email', 'telefono', 'ubicacion'];
+    
+    camposBasicos.forEach(campo => {
+        const elemento = document.getElementById(campo);
+        if (elemento) {
+            elemento.addEventListener('input', () => {
+                calcularProgreso();
+                guardarFormularioAutomatico();
+            });
+        }
+    });
+}
 function obtenerNombreArchivo() {
     const nombre = document.getElementById('nombre').value.trim();
     return nombre ? nombre.replace(/[^a-zA-Z0-9]/g, '_') : 'CV';
@@ -592,4 +929,42 @@ function mostrarAlerta(mensaje, tipo) {
 // ===== INICIALIZACIÓN =====
 document.addEventListener('DOMContentLoaded', function() {
     console.log('🚀 Generador CV Harvard inicializado');
+    console.log('💫 Funciones mejoradas: Guardado automático, Progreso, Contadores, PDF');
+    
+    // Configurar funciones mejoradas
+    configurarContadores();
+    configurarEventosFormulario();
+    
+    // Cargar formulario guardado si existe
+    cargarFormularioGuardado();
+    
+    // Calcular progreso inicial
+    calcularProgreso();
+    
+    // Configurar contadores para secciones opcionales
+    const seccionesOpcionales = [
+        { campo: 'certificaciones', contador: 'certificacionesCounter' },
+        { campo: 'idiomas', contador: 'idiomasCounter' }
+    ];
+    
+    seccionesOpcionales.forEach(({ campo, contador }) => {
+        const elemento = document.getElementById(campo);
+        const contadorElemento = document.getElementById(contador);
+        
+        if (elemento && contadorElemento) {
+            elemento.addEventListener('input', () => {
+                const longitud = elemento.value.length;
+                contadorElemento.textContent = `${longitud} caracteres`;
+                
+                if (longitud > 0) {
+                    contadorElemento.className = 'text-success';
+                } else {
+                    contadorElemento.className = 'text-muted';
+                }
+                
+                calcularProgreso();
+                guardarFormularioAutomatico();
+            });
+        }
+    });
 });

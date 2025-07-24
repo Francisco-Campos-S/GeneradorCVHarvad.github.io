@@ -283,6 +283,34 @@
             to { transform: rotate(360deg); }
         }
 
+        .progress-container {
+            transition: all 0.3s ease;
+        }
+
+        .progress-container:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px var(--shadow);
+        }
+
+        .character-counter {
+            font-size: 0.8rem;
+            transition: color 0.3s ease;
+        }
+
+        .section-optional {
+            border: 2px dashed var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            background: var(--preview-bg);
+            transition: all 0.3s ease;
+        }
+
+        .section-optional:hover {
+            border-color: #667eea;
+            background: var(--card-bg);
+        }
+
         @media (max-width: 768px) {
             .theme-toggle {
                 top: 10px;
@@ -293,6 +321,10 @@
             .container {
                 margin: 10px;
                 padding: 20px;
+            }
+            
+            .progress-container {
+                padding: 10px;
             }
         }
     </style>
@@ -321,6 +353,22 @@
         
         <!-- Contenedor de alertas -->
         <div id="alertas"></div>
+        
+        <!-- Barra de Progreso -->
+        <div class="progress-container mb-4" style="background: var(--card-bg); border: 2px solid var(--border-color); border-radius: 12px; padding: 15px;">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <h6 class="mb-0" style="color: var(--text-primary);"><i class="fas fa-chart-line icon"></i>Progreso del CV</h6>
+                <span id="progressPercentage" class="badge bg-primary">0%</span>
+            </div>
+            <div class="progress" style="height: 10px;">
+                <div class="progress-bar bg-success progress-bar-striped progress-bar-animated" id="progressBar" 
+                     role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                </div>
+            </div>
+            <div class="mt-2">
+                <small id="progressText" style="color: var(--text-secondary);">Completa los campos para generar tu CV profesional</small>
+            </div>
+        </div>
         
         <form id="cvForm">
             <!-- Información Personal -->
@@ -371,7 +419,10 @@
                 <label for="educacion" class="form-label">Formación Académica</label>
                 <textarea class="form-control textarea-large" id="educacion" 
                     placeholder="Ejemplo:&#10;Máster en Ciencia de Datos&#10;Universidad de Barcelona, 2021-2023&#10;&#10;Licenciatura en Matemáticas&#10;Universidad Autónoma de Barcelona, 2017-2021"></textarea>
-                <div class="form-text">Separa cada título/institución con una línea nueva</div>
+                <div class="d-flex justify-content-between">
+                    <div class="form-text">Separa cada título/institución con una línea nueva</div>
+                    <small id="educacionCounter" class="text-muted">0 caracteres</small>
+                </div>
             </div>
             
             <!-- Experiencia -->
@@ -383,7 +434,10 @@
                 <label for="experiencia" class="form-label">Experiencia Laboral</label>
                 <textarea class="form-control textarea-large" id="experiencia" 
                     placeholder="Ejemplo:&#10;Data Scientist&#10;InnovaTech Solutions, 2023-presente&#10;• Análisis de datos con Python y R&#10;• Desarrollo de modelos de machine learning&#10;• Visualización de datos con Tableau"></textarea>
-                <div class="form-text">Usa • para viñetas en las responsabilidades</div>
+                <div class="d-flex justify-content-between">
+                    <div class="form-text">Usa • para viñetas en las responsabilidades</div>
+                    <small id="experienciaCounter" class="text-muted">0 caracteres</small>
+                </div>
             </div>
             
             <!-- Habilidades -->
@@ -395,7 +449,10 @@
                 <label for="habilidades" class="form-label">Competencias Técnicas</label>
                 <textarea class="form-control textarea-large" id="habilidades" 
                     placeholder="Ejemplo:&#10;Lenguajes: Python, JavaScript, TypeScript, SQL&#10;Frontend: React, Angular, Vue.js, HTML5, CSS3&#10;Backend: Node.js, Django, FastAPI, Express&#10;Bases de datos: PostgreSQL, MongoDB, MySQL&#10;Herramientas: Git, Docker, AWS, Azure"></textarea>
-                <div class="form-text">Agrupa por categorías para mejor organización</div>
+                <div class="d-flex justify-content-between">
+                    <div class="form-text">Agrupa por categorías para mejor organización</div>
+                    <small id="habilidadesCounter" class="text-muted">0 caracteres</small>
+                </div>
             </div>
 
             <!-- Proyectos -->
@@ -407,7 +464,30 @@
                 <label for="proyectos" class="form-label">Proyectos Profesionales</label>
                 <textarea class="form-control textarea-large" id="proyectos" 
                     placeholder="Ejemplo:&#10;E-commerce Platform (2023)&#10;• Desarrollado con React, Node.js y PostgreSQL&#10;• Integración de pagos con Stripe&#10;• Dashboard de administración con Angular&#10;• Más de 10,000 usuarios activos"></textarea>
-                <div class="form-text">Incluye tecnologías utilizadas y métricas de impacto</div>
+                <div class="d-flex justify-content-between">
+                    <div class="form-text">Incluye tecnologías utilizadas y métricas de impacto</div>
+                    <small id="proyectosCounter" class="text-muted">0 caracteres</small>
+                </div>
+            </div>
+
+            <!-- Secciones Opcionales -->
+            <div class="section-header">
+                <i class="fas fa-plus icon"></i>Secciones Adicionales (Opcional)
+            </div>
+            
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="certificaciones" class="form-label">Certificaciones</label>
+                    <textarea class="form-control" id="certificaciones" rows="3"
+                        placeholder="Ejemplo:&#10;• AWS Certified Solutions Architect (2023)&#10;• Google Cloud Professional Developer (2022)&#10;• Certified Scrum Master (2021)"></textarea>
+                    <small id="certificacionesCounter" class="text-muted">0 caracteres</small>
+                </div>
+                <div class="col-md-6">
+                    <label for="idiomas" class="form-label">Idiomas</label>
+                    <textarea class="form-control" id="idiomas" rows="3"
+                        placeholder="Ejemplo:&#10;• Español: Nativo&#10;• Inglés: C1 - Avanzado&#10;• Francés: B2 - Intermedio Alto"></textarea>
+                    <small id="idiomasCounter" class="text-muted">0 caracteres</small>
+                </div>
             </div>
 
             <!-- Análisis con Python -->
@@ -440,6 +520,9 @@
             <div class="mb-3">
                 <button type="button" class="download-btn" onclick="generarWord()" id="wordBtn">
                     <i class="fas fa-file-word icon"></i>Descargar Word
+                </button>
+                <button type="button" class="download-btn" onclick="generarPDF()" id="pdfBtn">
+                    <i class="fas fa-file-pdf icon"></i>Generar PDF
                 </button>
                 <button type="button" class="download-btn" onclick="verVistaPrevia()" id="previewBtn">
                     <i class="fas fa-eye icon"></i>Vista Previa
