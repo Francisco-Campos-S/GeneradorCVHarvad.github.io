@@ -4,16 +4,10 @@
   "description": "Generador de CV profesional en formato Harvard",
   "main": "index.html",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview",
-    "serve": "vite --host 0.0.0.0 --port 3000"
+    "start": "python -m http.server 8000",
+    "dev": "python -m http.server 8000"
   },
   "keywords": ["cv", "curriculum", "harvard", "generator", "professional"],
   "author": "Francisco Campos",
-  "license": "MIT",
-  "devDependencies": {
-    "vite": "^5.0.0"
-  },
-  "type": "module"
+  "license": "MIT"
 }
